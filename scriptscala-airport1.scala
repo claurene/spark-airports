@@ -7,7 +7,7 @@
 val df = spark.read.format("csv")
     .option("header", "true")
     .option("inferSchema", "true")
-    .load("/home/laurene/Documents/M2 MIAGE/CM Big Data/data/full/*.csv")
+    .load("/home/laurene/Documents/M2 MIAGE/CM Big Data/data/2006_shuf.csv") //full/*.csv
 // Afficher les colonnes de la dataframe
 df.printSchema
 
@@ -25,7 +25,10 @@ val df_carriers = spark.read.format("csv")
 df_carriers.printSchema
 
 // Q1: meilleurs moois, jour et jourSemaine pour minimiser les retards
-val df1 = df.withColumn("ArrDelay", col("ArrDelay").cast("double")).na.fill(0,Seq("ArrDelay"))
+val df1 = df
+    .withColumn("ArrDelay", col("ArrDelay").cast("double"))
+    .filter($"Cancelled" =!= 1 && $"Diverted" =!= 1)
+    .na.fill(0,Seq("ArrDelay"))
 
 // Meilleur jour
 val req1 = df1.groupBy("DayOfMonth").agg(avg("ArrDelay").as("AvgDelay"))
@@ -82,6 +85,7 @@ df2.sort(desc("CountDelay")).show
 // Q3: 5 groupes de compagnies en fonction des retards
 val df3 = df
     .select(col("UniqueCarrier"),col("ArrDelay").cast("double"),col("DepDelay").cast("double"))
+    .filter($"Cancelled" =!= 1 && $"Diverted" =!= 1)
     .na.fill(0,Seq("ArrDelay"))
     .na.fill(0,Seq("DepDelay"))
 
@@ -121,12 +125,19 @@ predictions
     .show(false) // afficher le nom complet (sans limite de caractères)
 
 // Q4 Quels sont les 3 aéroports les plus/moins sujets aux retards (départ/arrivé)
-
-val df4 = df.select(col("Origin"),col("ArrDelay").cast("double"),col("DepDelay").cast("double"))
+val df4 = df.select(col("Origin"),col("Dest"),col("ArrDelay").cast("double"),col("DepDelay").cast("double"))
+    .filter($"Cancelled" =!= 1 && $"Diverted" =!= 1)
     .na.fill(0,Seq("ArrDelay"))
     .na.fill(0,Seq("DepDelay"))
 
-val df4g = df4.groupBy("Origin").agg((avg("ArrDelay")+avg("DepDelay")).as("TotalDelay"))
+// On récupère les retards au départ et à l'arrivée
+val df4o = df4.groupBy("Origin").agg(avg("DepDelay").as("DepDelay"))
+val df4d = df4.groupBy("Dest").agg(avg("ArrDelay").as("ArrDelay"))
+
+val df4g = df4o
+    .join(df4d,df4o("Origin")===df4d("Dest"))
+    .groupBy("Origin")
+    .agg((avg("DepDelay")+avg("ArrDelay")).as("TotalDelay")) //avg nécéssaire pour compiler
 
 df4g.sort(desc("TotalDelay")).limit(3).show
 
