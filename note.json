@@ -1,0 +1,1279 @@
+{
+  "paragraphs": [
+    {
+      "title": "Chargement des données",
+      "text": "// Charger les 3 fichiers (2006, 2007 et 2008)\nval df \u003d spark.read.format(\"csv\")\n    .option(\"header\", \"true\")\n    .option(\"inferSchema\", \"true\")\n    .load(\"/home/laurene/Documents/M2 MIAGE/CM Big Data/data/full/*.csv\")\n// Afficher les colonnes de la dataframe\ndf.printSchema\n\n// Charger les fichiers complémentaires\nval df_airports \u003d spark.read.format(\"csv\")\n    .option(\"header\", \"true\")\n    .option(\"inferSchema\", \"true\")\n    .load(\"/home/laurene/Documents/M2 MIAGE/CM Big Data/data/airports.csv\")\ndf_airports.printSchema\n\nval df_carriers \u003d spark.read.format(\"csv\")\n    .option(\"header\", \"true\")\n    .option(\"inferSchema\", \"true\")\n    .load(\"/home/laurene/Documents/M2 MIAGE/CM Big Data/data/carriers.csv\")\ndf_carriers.printSchema",
+      "user": "anonymous",
+      "dateUpdated": "2019-03-10 15:18:29.404",
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "title": true,
+        "results": {},
+        "enabled": true,
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "root\n |-- Year: integer (nullable \u003d true)\n |-- Month: integer (nullable \u003d true)\n |-- DayofMonth: integer (nullable \u003d true)\n |-- DayOfWeek: integer (nullable \u003d true)\n |-- DepTime: string (nullable \u003d true)\n |-- CRSDepTime: integer (nullable \u003d true)\n |-- ArrTime: string (nullable \u003d true)\n |-- CRSArrTime: integer (nullable \u003d true)\n |-- UniqueCarrier: string (nullable \u003d true)\n |-- FlightNum: integer (nullable \u003d true)\n |-- TailNum: string (nullable \u003d true)\n |-- ActualElapsedTime: string (nullable \u003d true)\n |-- CRSElapsedTime: string (nullable \u003d true)\n |-- AirTime: string (nullable \u003d true)\n |-- ArrDelay: string (nullable \u003d true)\n |-- DepDelay: string (nullable \u003d true)\n |-- Origin: string (nullable \u003d true)\n |-- Dest: string (nullable \u003d true)\n |-- Distance: integer (nullable \u003d true)\n |-- TaxiIn: string (nullable \u003d true)\n |-- TaxiOut: string (nullable \u003d true)\n |-- Cancelled: integer (nullable \u003d true)\n |-- CancellationCode: string (nullable \u003d true)\n |-- Diverted: integer (nullable \u003d true)\n |-- CarrierDelay: string (nullable \u003d true)\n |-- WeatherDelay: string (nullable \u003d true)\n |-- NASDelay: string (nullable \u003d true)\n |-- SecurityDelay: string (nullable \u003d true)\n |-- LateAircraftDelay: string (nullable \u003d true)\n\nroot\n |-- iata: string (nullable \u003d true)\n |-- airport: string (nullable \u003d true)\n |-- city: string (nullable \u003d true)\n |-- state: string (nullable \u003d true)\n |-- country: string (nullable \u003d true)\n |-- lat: double (nullable \u003d true)\n |-- long: double (nullable \u003d true)\n\nroot\n |-- Code: string (nullable \u003d true)\n |-- Description: string (nullable \u003d true)\n\ndf: org.apache.spark.sql.DataFrame \u003d [Year: int, Month: int ... 27 more fields]\ndf_airports: org.apache.spark.sql.DataFrame \u003d [iata: string, airport: string ... 5 more fields]\ndf_carriers: org.apache.spark.sql.DataFrame \u003d [Code: string, Description: string]\n"
+          }
+        ]
+      },
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            "http://zenbook.home:4040/jobs/job?id\u003d0",
+            "http://zenbook.home:4040/jobs/job?id\u003d1",
+            "http://zenbook.home:4040/jobs/job?id\u003d2",
+            "http://zenbook.home:4040/jobs/job?id\u003d3",
+            "http://zenbook.home:4040/jobs/job?id\u003d4",
+            "http://zenbook.home:4040/jobs/job?id\u003d5"
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "apps": [],
+      "jobName": "paragraph_1551992625305_1502814403",
+      "id": "20190307-152803_273982843",
+      "dateCreated": "2019-03-07 22:03:45.305",
+      "dateStarted": "2019-03-10 15:18:29.531",
+      "dateFinished": "2019-03-10 15:19:41.144",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Q1: Quel est le meilleur moment (jour, jour de la semaine, mois) pour partir si on veut minimiser les retards ?",
+      "text": "val df1 \u003d df\n    .withColumn(\"ArrDelay\", col(\"ArrDelay\").cast(\"double\"))\n    .filter($\"Cancelled\" \u003d!\u003d 1 \u0026\u0026 $\"Diverted\" \u003d!\u003d 1)\n    .na.fill(0,Seq(\"ArrDelay\"))\n\n// On créé également des fonctions pour formatter le jour et le mois\ndef jourSemaineUDF \u003d udf { (day:Int) \u003d\u003e\n    day match {\n        case 1 \u003d\u003e \"Lundi\"\n        case 2 \u003d\u003e \"Mardi\"\n        case 3 \u003d\u003e \"Mercredi\"\n        case 4 \u003d\u003e \"Jeudi\"\n        case 5 \u003d\u003e \"Vendredi\"\n        case 6 \u003d\u003e \"Samedi\"\n        case 7 \u003d\u003e \"Dimanche\"\n    }\n}\n\ndef moisUDF \u003d udf { (day:Int) \u003d\u003e\n    day match {\n        case 1 \u003d\u003e \"Janvier\"\n        case 2 \u003d\u003e \"Février\"\n        case 3 \u003d\u003e \"Mars\"\n        case 4 \u003d\u003e \"Avril\"\n        case 5 \u003d\u003e \"Mai\"\n        case 6 \u003d\u003e \"Juin\"\n        case 7 \u003d\u003e \"Juillet\"\n        case 8 \u003d\u003e \"Août\"\n        case 9 \u003d\u003e \"Septembre\"\n        case 10 \u003d\u003e \"Octobre\"\n        case 11 \u003d\u003e \"Novembre\"\n        case 12 \u003d\u003e \"Décembre\"\n    }\n}\n\n// Meilleur jour\nval req1 \u003d df1.groupBy(\"DayOfMonth\").agg(avg(\"ArrDelay\").as(\"AvgDelay\"))\nprintln(\"Meilleur jour du mois :\")\nreq1.sort(asc(\"AvgDelay\")).select(\"DayOfMonth\").limit(1).show\n\n// Meilleur jour de la semaine\nval req2 \u003d df1.groupBy(\"DayOfWeek\").agg(avg(\"ArrDelay\").as(\"AvgDelay\")).withColumn(\"DayOfWeek\",jourSemaineUDF(col(\"DayOfWeek\")))\nprintln(\"Meilleur jour de la semaine :\")\nreq2.sort(asc(\"AvgDelay\")).select(\"DayOfWeek\").limit(1).show\n\n// Meilleur mois\nval req3 \u003d df1.groupBy(\"Month\").agg(avg(\"ArrDelay\").as(\"AvgDelay\")).withColumn(\"Month\",moisUDF(col(\"Month\")))\nprintln(\"Meilleur mois :\")\nreq3.sort(asc(\"AvgDelay\")).select(\"Month\").limit(1).show",
+      "user": "anonymous",
+      "dateUpdated": "2019-03-10 15:19:41.196",
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "title": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 354.0,
+              "optionOpen": false
+            }
+          }
+        },
+        "enabled": true,
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Meilleur jour du mois :\n+----------+\n|DayOfMonth|\n+----------+\n|         9|\n+----------+\n\nMeilleur jour de la semaine :\n+---------+\n|DayOfWeek|\n+---------+\n|   Samedi|\n+---------+\n\nMeilleur mois :\n+---------+\n|    Month|\n+---------+\n|Septembre|\n+---------+\n\ndf1: org.apache.spark.sql.DataFrame \u003d [Year: int, Month: int ... 27 more fields]\njourSemaineUDF: org.apache.spark.sql.expressions.UserDefinedFunction\nmoisUDF: org.apache.spark.sql.expressions.UserDefinedFunction\nreq1: org.apache.spark.sql.DataFrame \u003d [DayOfMonth: int, AvgDelay: double]\nreq2: org.apache.spark.sql.DataFrame \u003d [DayOfWeek: string, AvgDelay: double]\nreq3: org.apache.spark.sql.DataFrame \u003d [Month: string, AvgDelay: double]\n"
+          }
+        ]
+      },
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            "http://zenbook.home:4040/jobs/job?id\u003d6",
+            "http://zenbook.home:4040/jobs/job?id\u003d7",
+            "http://zenbook.home:4040/jobs/job?id\u003d8"
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "apps": [],
+      "jobName": "paragraph_1551992625306_155721089",
+      "id": "20190307-154417_693262790",
+      "dateCreated": "2019-03-07 22:03:45.306",
+      "dateStarted": "2019-03-10 15:19:41.298",
+      "dateFinished": "2019-03-10 15:20:52.842",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "req2.registerTempTable(\"req2\")\nreq3.registerTempTable(\"req3\")",
+      "user": "anonymous",
+      "dateUpdated": "2019-03-10 15:20:52.857",
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/scala",
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "warning: there were two deprecation warnings; re-run with -deprecation for details\n"
+          }
+        ]
+      },
+      "apps": [],
+      "jobName": "paragraph_1551993327022_1303566794",
+      "id": "20190307-221527_436154575",
+      "dateCreated": "2019-03-07 22:15:27.022",
+      "dateStarted": "2019-03-10 15:20:52.997",
+      "dateFinished": "2019-03-10 15:20:53.357",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%sql select * from req2 order by AvgDelay asc",
+      "user": "anonymous",
+      "dateUpdated": "2019-03-10 16:03:41.079",
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "multiBarChart",
+              "height": 300.0,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "DayOfWeek": "string",
+                      "AvgDelay": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                },
+                "multiBarChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                }
+              },
+              "commonSetting": {},
+              "keys": [
+                {
+                  "name": "DayOfWeek",
+                  "index": 0.0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": [
+                {
+                  "name": "AvgDelay",
+                  "index": 1.0,
+                  "aggr": "sum"
+                }
+              ]
+            },
+            "helium": {}
+          }
+        },
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/sql",
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TABLE",
+            "data": "DayOfWeek\tAvgDelay\nSamedi\t5.601322767333661\nMardi\t7.324724186326446\nMercredi\t8.178756074604419\nLundi\t9.21883572500505\nDimanche\t9.32735711820442\nJeudi\t10.927920165081677\nVendredi\t12.135661515641933\n"
+          },
+          {
+            "type": "TEXT",
+            "data": ""
+          }
+        ]
+      },
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            "http://zenbook.home:4040/jobs/job?id\u003d9"
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "apps": [],
+      "jobName": "paragraph_1551994143272_-942601726",
+      "id": "20190307-222903_2063891419",
+      "dateCreated": "2019-03-07 22:29:03.272",
+      "dateStarted": "2019-03-10 15:20:53.548",
+      "dateFinished": "2019-03-10 15:21:15.904",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%sql select * from req3 order by AvgDelay asc",
+      "user": "anonymous",
+      "dateUpdated": "2019-03-10 16:03:41.167",
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "multiBarChart",
+              "height": 300.0,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "Month": "string",
+                      "AvgDelay": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                },
+                "multiBarChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                }
+              },
+              "commonSetting": {},
+              "keys": [
+                {
+                  "name": "Month",
+                  "index": 0.0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": [
+                {
+                  "name": "AvgDelay",
+                  "index": 1.0,
+                  "aggr": "sum"
+                }
+              ]
+            },
+            "helium": {}
+          }
+        },
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/sql",
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TABLE",
+            "data": "Month\tAvgDelay\nSeptembre\t4.3665827019279275\nNovembre\t4.78168193093598\nOctobre\t6.023192965791264\nMai\t6.639218187481358\nAvril\t7.264470289649177\nJanvier\t8.360868341201993\nAoût\t9.448986328575153\nMars\t9.74065159379684\nFévrier\t11.377762944015636\nJuillet\t11.821609320189255\nJuin\t13.858472390124764\nDécembre\t14.625724142917523\n"
+          },
+          {
+            "type": "TEXT",
+            "data": ""
+          }
+        ]
+      },
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            "http://zenbook.home:4040/jobs/job?id\u003d10"
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "apps": [],
+      "jobName": "paragraph_1551994284185_-2035658693",
+      "id": "20190307-223124_190308684",
+      "dateCreated": "2019-03-07 22:31:24.185",
+      "dateStarted": "2019-03-10 15:21:16.030",
+      "dateFinished": "2019-03-10 15:21:38.447",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Q2:  Quelles sont les causes principales de retard ? (âge des avions, météo, compagnie...) ?",
+      "text": "val col2 \u003d Array(\"CarrierDelay\",\"WeatherDelay\",\"NASDelay\",\"SecurityDelay\",\"LateAircraftDelay\")\n\nval df2 \u003d col2.map { name:String \u003d\u003e (name, df.filter(name+\"\u003e0\").count)}.toSeq.toDF(\"Name\",\"CountDelay\")\ndf2.sort(desc(\"CountDelay\")).show",
+      "user": "anonymous",
+      "dateUpdated": "2019-03-10 15:21:38.449",
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "title": true,
+        "results": {},
+        "enabled": true,
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "+-----------------+----------+\n|             Name|CountDelay|\n+-----------------+----------+\n|         NASDelay|   2914154|\n|LateAircraftDelay|   2269341|\n|     CarrierDelay|   2203893|\n|     WeatherDelay|    341577|\n|    SecurityDelay|     26144|\n+-----------------+----------+\n\ncol2: Array[String] \u003d Array(CarrierDelay, WeatherDelay, NASDelay, SecurityDelay, LateAircraftDelay)\ndf2: org.apache.spark.sql.DataFrame \u003d [Name: string, CountDelay: bigint]\n"
+          }
+        ]
+      },
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            "http://zenbook.home:4040/jobs/job?id\u003d11",
+            "http://zenbook.home:4040/jobs/job?id\u003d12",
+            "http://zenbook.home:4040/jobs/job?id\u003d13",
+            "http://zenbook.home:4040/jobs/job?id\u003d14",
+            "http://zenbook.home:4040/jobs/job?id\u003d15",
+            "http://zenbook.home:4040/jobs/job?id\u003d16"
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "apps": [],
+      "jobName": "paragraph_1551992625307_1638813339",
+      "id": "20190307-160822_2129266388",
+      "dateCreated": "2019-03-07 22:03:45.307",
+      "dateStarted": "2019-03-10 15:21:38.598",
+      "dateFinished": "2019-03-10 15:23:07.430",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "df2.registerTempTable(\"df2\")",
+      "user": "anonymous",
+      "dateUpdated": "2019-03-10 15:23:07.471",
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/scala",
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "warning: there was one deprecation warning; re-run with -deprecation for details\n"
+          }
+        ]
+      },
+      "apps": [],
+      "jobName": "paragraph_1551993363557_202570938",
+      "id": "20190307-221603_493431615",
+      "dateCreated": "2019-03-07 22:16:03.558",
+      "dateStarted": "2019-03-10 15:23:07.600",
+      "dateFinished": "2019-03-10 15:23:07.917",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%sql select * from df2 order by CountDelay desc",
+      "user": "anonymous",
+      "dateUpdated": "2019-03-10 15:23:07.982",
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "pieChart",
+              "height": 300.0,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "Name": "string",
+                      "CountDelay": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                },
+                "multiBarChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                }
+              },
+              "commonSetting": {},
+              "keys": [
+                {
+                  "name": "Name",
+                  "index": 0.0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": [
+                {
+                  "name": "CountDelay",
+                  "index": 1.0,
+                  "aggr": "sum"
+                }
+              ]
+            },
+            "helium": {}
+          }
+        },
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/sql",
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TABLE",
+            "data": "Name\tCountDelay\nNASDelay\t2914154\nLateAircraftDelay\t2269341\nCarrierDelay\t2203893\nWeatherDelay\t341577\nSecurityDelay\t26144\n"
+          },
+          {
+            "type": "TEXT",
+            "data": ""
+          }
+        ]
+      },
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            "http://zenbook.home:4040/jobs/job?id\u003d17"
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "apps": [],
+      "jobName": "paragraph_1551994322475_-1465054453",
+      "id": "20190307-223202_87017720",
+      "dateCreated": "2019-03-07 22:32:02.475",
+      "dateStarted": "2019-03-10 15:23:08.086",
+      "dateFinished": "2019-03-10 15:23:08.222",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Q3: Quelles sont les compagnies les plus/moins sujettes aux retards (5 groupes)",
+      "text": "val df3 \u003d df\n    .select(col(\"UniqueCarrier\"),col(\"ArrDelay\").cast(\"double\"),col(\"DepDelay\").cast(\"double\"))\n    .filter($\"Cancelled\" \u003d!\u003d 1 \u0026\u0026 $\"Diverted\" \u003d!\u003d 1)\n    .na.fill(0,Seq(\"ArrDelay\"))\n    .na.fill(0,Seq(\"DepDelay\"))\n\nval df3g \u003d df3.groupBy(\"UniqueCarrier\").agg(avg(\"ArrDelay\").as(\"ArrDelay\"),avg(\"DepDelay\").as(\"DepDelay\"))\n\n// K-means\nimport org.apache.spark.ml.feature.VectorAssembler\nimport org.apache.spark.ml.clustering.{KMeans,KMeansModel}\nimport org.apache.spark.ml.Pipeline\n\nval assembler \u003d new VectorAssembler().setInputCols(Array(\"ArrDelay\",\"DepDelay\")).setOutputCol(\"features\")\nval kmeans \u003d new KMeans().setK(5).setFeaturesCol(\"features\").setPredictionCol(\"prediction\")\nval pipeline \u003d new Pipeline().setStages(Array(assembler, kmeans))\nval model \u003d pipeline.fit(df3g)\nval predictions \u003d model.transform(df3g)\n\n// Afficher les coordonées des clusters pour caractériser les différents groupes\nmodel.stages.last.asInstanceOf[KMeansModel].clusterCenters.foreach(println)",
+      "user": "anonymous",
+      "dateUpdated": "2019-03-10 15:23:08.268",
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "title": true,
+        "results": {},
+        "enabled": true,
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "[6.106280676890199,7.027108939759698]\n[-0.6122804308610512,-0.2377525587749199]\n[11.334688358265883,12.19582286155677]\n[7.654144663034837,8.729630494036641]\n[14.879534459720709,14.5144340403966]\ndf3: org.apache.spark.sql.DataFrame \u003d [UniqueCarrier: string, ArrDelay: double ... 1 more field]\ndf3g: org.apache.spark.sql.DataFrame \u003d [UniqueCarrier: string, ArrDelay: double ... 1 more field]\nimport org.apache.spark.ml.feature.VectorAssembler\nimport org.apache.spark.ml.clustering.{KMeans, KMeansModel}\nimport org.apache.spark.ml.Pipeline\nassembler: org.apache.spark.ml.feature.VectorAssembler \u003d vecAssembler_06039e3a7ad9\nkmeans: org.apache.spark.ml.clustering.KMeans \u003d kmeans_908fbbbc8c73\npipeline: org.apache.spark.ml.Pipeline \u003d pipeline_881c1f210769\nmodel: org.apache.spark.ml.PipelineModel \u003d pipeline_881c1f210769\npredictions: org.apache.spark.sql.DataFrame \u003d [UniqueCarrier: string, ArrDelay: double ... 3 more fields]\n"
+          }
+        ]
+      },
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            "http://zenbook.home:4040/jobs/job?id\u003d18",
+            "http://zenbook.home:4040/jobs/job?id\u003d19",
+            "http://zenbook.home:4040/jobs/job?id\u003d20",
+            "http://zenbook.home:4040/jobs/job?id\u003d21",
+            "http://zenbook.home:4040/jobs/job?id\u003d22",
+            "http://zenbook.home:4040/jobs/job?id\u003d23",
+            "http://zenbook.home:4040/jobs/job?id\u003d24",
+            "http://zenbook.home:4040/jobs/job?id\u003d25",
+            "http://zenbook.home:4040/jobs/job?id\u003d26",
+            "http://zenbook.home:4040/jobs/job?id\u003d27"
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "apps": [],
+      "jobName": "paragraph_1551992625309_-1679044683",
+      "id": "20190307-161007_957718697",
+      "dateCreated": "2019-03-07 22:03:45.309",
+      "dateStarted": "2019-03-10 15:23:08.382",
+      "dateFinished": "2019-03-10 15:24:09.440",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%md\nLes centres des clusters nous ont permis de déterminer les groupes de compagnies les plus/moins sujettes aux retards.\nD\u0027après le résultat précédent, le groupe 1 contient les compagnies les mois sujettes aux retards tandis que le groupe 4 contient celles les plus sujettes. Nous allons représenter ces groupes sur le schéma suivant :",
+      "user": "anonymous",
+      "dateUpdated": "2019-03-10 15:24:09.530",
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true,
+          "completionKey": "TAB",
+          "completionSupport": false
+        },
+        "editorMode": "ace/mode/markdown",
+        "editorHide": false,
+        "tableHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"markdown-body\"\u003e\n\u003cp\u003eLes centres des clusters nous ont permis de déterminer les groupes de compagnies les plus/moins sujettes aux retards.\u003cbr/\u003eD\u0026rsquo;après le résultat précédent, le groupe 1 contient les compagnies les mois sujettes aux retards tandis que le groupe 4 contient celles les plus sujettes. Nous allons représenter ces groupes sur le schéma suivant :\u003c/p\u003e\n\u003c/div\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "jobName": "paragraph_1551994982657_815976253",
+      "id": "20190307-224302_293179387",
+      "dateCreated": "2019-03-07 22:43:02.657",
+      "dateStarted": "2019-03-10 15:24:09.642",
+      "dateFinished": "2019-03-10 15:24:12.152",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "predictions.registerTempTable(\"predictions\")",
+      "user": "anonymous",
+      "dateUpdated": "2019-03-10 15:24:12.230",
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/scala",
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "warning: there was one deprecation warning; re-run with -deprecation for details\n"
+          }
+        ]
+      },
+      "apps": [],
+      "jobName": "paragraph_1551993382961_401692969",
+      "id": "20190307-221622_911182922",
+      "dateCreated": "2019-03-07 22:16:22.961",
+      "dateStarted": "2019-03-10 15:24:12.334",
+      "dateFinished": "2019-03-10 15:24:12.590",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%sql select * from predictions",
+      "user": "anonymous",
+      "dateUpdated": "2019-03-10 15:24:12.625",
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "scatterChart",
+              "height": 300.0,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "UniqueCarrier": "string",
+                      "ArrDelay": "string",
+                      "DepDelay": "string",
+                      "features": "string",
+                      "prediction": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                },
+                "scatterChart": {
+                  "yAxis": {
+                    "name": "ArrDelay",
+                    "index": 1.0,
+                    "aggr": "sum"
+                  },
+                  "xAxis": {
+                    "name": "DepDelay",
+                    "index": 2.0,
+                    "aggr": "sum"
+                  },
+                  "group": {
+                    "name": "prediction",
+                    "index": 4.0,
+                    "aggr": "sum"
+                  }
+                }
+              }
+            },
+            "helium": {}
+          }
+        },
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/sql",
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TABLE",
+            "data": "UniqueCarrier\tArrDelay\tDepDelay\tfeatures\tprediction\nUA\t11.513516998385041\t13.234468933592924\t[11.513516998385041,13.234468933592924]\t2\nAA\t12.184081066468606\t12.825718561075643\t[12.184081066468606,12.825718561075643]\t2\nNW\t9.406617174206493\t7.483335584535178\t[9.406617174206493,7.483335584535178]\t3\nEV\t13.988348547636614\t16.219314762951733\t[13.988348547636614,16.219314762951733]\t4\nB6\t11.859949952670597\t12.943802659818742\t[11.859949952670597,12.943802659818742]\t2\nDL\t7.374327438249183\t7.959599471031602\t[7.374327438249183,7.959599471031602]\t3\nOO\t7.892334586943147\t8.16743112128256\t[7.892334586943147,8.16743112128256]\t3\nF9\t6.1043331393615965\t6.155350071674922\t[6.1043331393615965,6.155350071674922]\t0\nYV\t11.443202519792287\t12.88597696676355\t[11.443202519792287,12.88597696676355]\t2\nTZ\t15.770720371804803\t12.809553317841466\t[15.770720371804803,12.809553317841466]\t4\nUS\t7.081816472450726\t8.595788118590152\t[7.081816472450726,8.595788118590152]\t3\nAQ\t-1.2230347763086398\t0.038478083680492665\t[-1.2230347763086398,0.038478083680492665]\t1\nMQ\t11.295616511901393\t11.753689402288797\t[11.295616511901393,11.753689402288797]\t2\nOH\t11.089668266349355\t11.000650372360049\t[11.089668266349355,11.000650372360049]\t2\nHA\t-0.001526085413462676\t-0.5139832012303325\t[-0.001526085413462676,-0.5139832012303325]\t1\nXE\t10.447833308789594\t10.978994946183393\t[10.447833308789594,10.978994946183393]\t2\nAS\t7.784597639461759\t8.886249237174798\t[7.784597639461759,8.886249237174798]\t3\nFL\t8.803984648305304\t9.685726718077774\t[8.803984648305304,9.685726718077774]\t3\nCO\t10.84363824177019\t11.943281050371056\t[10.84363824177019,11.943281050371056]\t2\nWN\t5.235334681627252\t10.32928320756443\t[5.235334681627252,10.32928320756443]\t3\n9E\t6.1082282144188005\t7.898867807844474\t[6.1082282144188005,7.898867807844474]\t0\n"
+          },
+          {
+            "type": "TEXT",
+            "data": ""
+          }
+        ]
+      },
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            "http://zenbook.home:4040/jobs/job?id\u003d28",
+            "http://zenbook.home:4040/jobs/job?id\u003d29",
+            "http://zenbook.home:4040/jobs/job?id\u003d30",
+            "http://zenbook.home:4040/jobs/job?id\u003d31",
+            "http://zenbook.home:4040/jobs/job?id\u003d32"
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "apps": [],
+      "jobName": "paragraph_1551994434363_364998018",
+      "id": "20190307-223354_1321043687",
+      "dateCreated": "2019-03-07 22:33:54.363",
+      "dateStarted": "2019-03-10 15:24:12.718",
+      "dateFinished": "2019-03-10 15:24:38.295",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%md\nMalheureusement, Zeppelin ne permet pas d\u0027ajouter un label aux points. Sinon, on aurait ajouté le code de la compagnie en label sur chaque point afin de pouvoir facilement visualiser ses valeurs moyennes de retard ainsi que son groupe.",
+      "user": "anonymous",
+      "dateUpdated": "2019-03-10 15:24:38.334",
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true,
+          "completionKey": "TAB",
+          "completionSupport": false
+        },
+        "editorMode": "ace/mode/markdown",
+        "editorHide": false,
+        "tableHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "\u003cdiv class\u003d\"markdown-body\"\u003e\n\u003cp\u003eMalheureusement, Zeppelin ne permet pas d\u0026rsquo;ajouter un label aux points. Sinon, on aurait ajouté le code de la compagnie en label sur chaque point afin de pouvoir facilement visualiser ses valeurs moyennes de retard ainsi que son groupe.\u003c/p\u003e\n\u003c/div\u003e"
+          }
+        ]
+      },
+      "apps": [],
+      "jobName": "paragraph_1551995065918_-1807329866",
+      "id": "20190307-224425_1546743051",
+      "dateCreated": "2019-03-07 22:44:25.918",
+      "dateStarted": "2019-03-10 15:24:38.380",
+      "dateFinished": "2019-03-10 15:24:38.437",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Résultat : compagnies les plus et moins sujettes aux retards (en fonction du résultat précédent)",
+      "text": "// On récupère le nom complet des compagnies via le fichier complémentaire\nprintln(\"Compagnies les moins sujettes aux retards\")\npredictions\n    .join(df_carriers,predictions(\"UniqueCarrier\")\u003d\u003d\u003ddf_carriers(\"Code\"))\n    .select(\"UniqueCarrier\",\"Description\",\"Prediction\")\n    .filter($\"prediction\" \u003d\u003d\u003d 1) // celon le résultat précédent\n    .show(false) // afficher le nom complet (sans limite de caractères)\n    \nprintln(\"Compagnies les plus sujettes aux retards\")\npredictions\n    .join(df_carriers,predictions(\"UniqueCarrier\")\u003d\u003d\u003ddf_carriers(\"Code\"))\n    .select(\"UniqueCarrier\",\"Description\",\"Prediction\")\n    .filter($\"prediction\" \u003d\u003d\u003d 4) // celon le résultat précédent\n    .show(false) // afficher le nom complet (sans limite de caractères)",
+      "user": "anonymous",
+      "dateUpdated": "2019-03-10 15:24:38.477",
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/scala",
+        "title": true,
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Compagnies les moins sujettes aux retards\n+-------------+----------------------+----------+\n|UniqueCarrier|Description           |Prediction|\n+-------------+----------------------+----------+\n|AQ           |Aloha Airlines Inc.   |1         |\n|HA           |Hawaiian Airlines Inc.|1         |\n+-------------+----------------------+----------+\n\nCompagnies les plus sujettes aux retards\n+-------------+---------------------------+----------+\n|UniqueCarrier|Description                |Prediction|\n+-------------+---------------------------+----------+\n|EV           |Atlantic Southeast Airlines|4         |\n|TZ           |ATA Airlines d/b/a ATA     |4         |\n+-------------+---------------------------+----------+\n\n"
+          }
+        ]
+      },
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            "http://zenbook.home:4040/jobs/job?id\u003d33",
+            "http://zenbook.home:4040/jobs/job?id\u003d34",
+            "http://zenbook.home:4040/jobs/job?id\u003d35",
+            "http://zenbook.home:4040/jobs/job?id\u003d36",
+            "http://zenbook.home:4040/jobs/job?id\u003d37",
+            "http://zenbook.home:4040/jobs/job?id\u003d38",
+            "http://zenbook.home:4040/jobs/job?id\u003d39",
+            "http://zenbook.home:4040/jobs/job?id\u003d40",
+            "http://zenbook.home:4040/jobs/job?id\u003d41",
+            "http://zenbook.home:4040/jobs/job?id\u003d42",
+            "http://zenbook.home:4040/jobs/job?id\u003d43",
+            "http://zenbook.home:4040/jobs/job?id\u003d44"
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "apps": [],
+      "jobName": "paragraph_1551993110828_418834749",
+      "id": "20190307-221150_740979220",
+      "dateCreated": "2019-03-07 22:11:50.828",
+      "dateStarted": "2019-03-10 15:24:38.562",
+      "dateFinished": "2019-03-10 15:25:33.935",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Q4: Quels sont les 3 aéroports les plus/moins sujets aux retards (départ/arrivé) ?",
+      "text": "val df4 \u003d df.select(col(\"Origin\"),col(\"Dest\"),col(\"ArrDelay\").cast(\"double\"),col(\"DepDelay\").cast(\"double\"))\n    .filter($\"Cancelled\" \u003d!\u003d 1 \u0026\u0026 $\"Diverted\" \u003d!\u003d 1)\n    .na.fill(0,Seq(\"ArrDelay\"))\n    .na.fill(0,Seq(\"DepDelay\"))\n\n// On récupère les retards au départ et à l\u0027arrivée\nval df4o \u003d df4.groupBy(\"Origin\").agg(avg(\"DepDelay\").as(\"DepDelay\"))\nval df4d \u003d df4.groupBy(\"Dest\").agg(avg(\"ArrDelay\").as(\"ArrDelay\"))\n\nval df4g \u003d df4o\n    .join(df4d,df4o(\"Origin\")\u003d\u003d\u003ddf4d(\"Dest\"))\n    .groupBy(\"Origin\")\n    .agg((avg(\"DepDelay\")+avg(\"ArrDelay\")).as(\"TotalDelay\"))\n\n// On utilise le fichier des aéroports pour obtenir le nom des aéroports concernés\nprintln(\"Aéroports les plus sujets aux retards\")\ndf4g\n    .join(df_airports,df4g(\"Origin\")\u003d\u003d\u003ddf_airports(\"iata\"))\n    .select(\"Origin\",\"airport\",\"TotalDelay\")\n    .sort(desc(\"TotalDelay\"))\n    .limit(3)\n    .show(false)\n    \nprintln(\"Aéroports les moins sujets aux retards\")\ndf4g\n    .join(df_airports,df4g(\"Origin\")\u003d\u003d\u003ddf_airports(\"iata\"))\n    .select(\"Origin\",\"airport\",\"TotalDelay\")\n    .sort(asc(\"TotalDelay\"))\n    .limit(3)\n    .show(false)",
+      "user": "anonymous",
+      "dateUpdated": "2019-03-10 15:27:51.239",
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "title": true,
+        "results": {},
+        "enabled": true,
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Aéroports les plus sujets aux retards\n+------+------------------+------------------+\n|Origin|airport           |TotalDelay        |\n+------+------------------+------------------+\n|ACK   |Nantucket Memorial|63.36926340940924 |\n|SOP   |Moore County      |50.839747846894994|\n|OTH   |North Bend Muni   |48.38306451612903 |\n+------+------------------+------------------+\n\nAéroports les moins sujets aux retards\n+------+------------------+------------------+\n|Origin|airport           |TotalDelay        |\n+------+------------------+------------------+\n|HVN   |Tweed-New Haven   |-6.0              |\n|PIH   |Pocatello Regional|-3.378354139839701|\n|GLH   |Mid Delta Regional|-3.0              |\n+------+------------------+------------------+\n\ndf4: org.apache.spark.sql.DataFrame \u003d [Origin: string, Dest: string ... 2 more fields]\ndf4o: org.apache.spark.sql.DataFrame \u003d [Origin: string, DepDelay: double]\ndf4d: org.apache.spark.sql.DataFrame \u003d [Dest: string, ArrDelay: double]\ndf4g: org.apache.spark.sql.DataFrame \u003d [Origin: string, TotalDelay: double]\n"
+          }
+        ]
+      },
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            "http://zenbook.home:4040/jobs/job?id\u003d45",
+            "http://zenbook.home:4040/jobs/job?id\u003d46",
+            "http://zenbook.home:4040/jobs/job?id\u003d47",
+            "http://zenbook.home:4040/jobs/job?id\u003d48"
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "apps": [],
+      "jobName": "paragraph_1551992625312_219334833",
+      "id": "20190307-171527_1042879896",
+      "dateCreated": "2019-03-07 22:03:45.312",
+      "dateStarted": "2019-03-10 15:27:51.293",
+      "dateFinished": "2019-03-10 15:29:20.185",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "df4g.join(df_airports,df4g(\"Origin\")\u003d\u003d\u003ddf_airports(\"iata\")).registerTempTable(\"df4g\")",
+      "user": "anonymous",
+      "dateUpdated": "2019-03-10 15:29:48.346",
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/scala",
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "warning: there was one deprecation warning; re-run with -deprecation for details\n"
+          }
+        ]
+      },
+      "apps": [],
+      "jobName": "paragraph_1551993431003_-501116033",
+      "id": "20190307-221711_1315276632",
+      "dateCreated": "2019-03-07 22:17:11.003",
+      "dateStarted": "2019-03-10 15:29:48.459",
+      "dateFinished": "2019-03-10 15:29:48.927",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%sql select * from df4g order by TotalDelay desc",
+      "user": "anonymous",
+      "dateUpdated": "2019-03-10 16:03:41.357",
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "multiBarChart",
+              "height": 300.0,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "Origin": "string",
+                      "TotalDelay": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                },
+                "multiBarChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                }
+              },
+              "commonSetting": {},
+              "keys": [
+                {
+                  "name": "Origin",
+                  "index": 0.0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": [
+                {
+                  "name": "TotalDelay",
+                  "index": 1.0,
+                  "aggr": "sum"
+                }
+              ]
+            },
+            "helium": {}
+          }
+        },
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/sql",
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TABLE",
+            "data": "Origin\tTotalDelay\tiata\tairport\tcity\tstate\tcountry\tlat\tlong\nACK\t63.36926340940924\tACK\tNantucket Memorial\tNantucket\tMA\tUSA\t41.25305194\t-70.06018139\nSOP\t50.839747846894994\tSOP\tMoore County\tPinehurst/Southern Pines\tNC\tUSA\t35.23735278\t-79.39116944\nOTH\t48.38306451612903\tOTH\tNorth Bend Muni\tNorth Bend\tOR\tUSA\t43.41713889\t-124.2460278\nHHH\t43.53821677173737\tHHH\tHilton Head\tNA\tNA\tUSA\t32.224384\t-80.697629\nPIR\t40.638888888888886\tPIR\tPierre Regional\tPierre\tSD\tUSA\t44.38267694\t-100.285965\nISO\t39.52547553370359\tISO\tKinston Regional Jetport At Stallin\tKinston\tNC\tUSA\t35.32807944\t-77.61552611\nEWR\t38.897518455060776\tEWR\tNewark Intl\tNewark\tNJ\tUSA\t40.69249722\t-74.16866056\nMQT\t37.3906010236937\tMQT\tMarquette County Airport\tNA\tNA\tUSA\t46.353639\t-87.395361\nMCN\t37.25775156051458\tMCN\tMiddle Georgia Regional\tMacon\tGA\tUSA\t32.69284944\t-83.64921083\nCEC\t36.91539483869083\tCEC\tJack McNamara \tCrescent City\tCA\tUSA\t41.78015722\t-124.2365333\nLMT\t35.8909786287914\tLMT\tKlamath Falls International\tKlamath Falls\tOR\tUSA\t42.15614361\t-121.7332081\nSPI\t35.60101017330928\tSPI\tCapital\tSpringfield\tIL\tUSA\t39.84395194\t-89.67761861\nAKN\t34.60205134821313\tAKN\tKing Salmon\tKing Salmon\tAK\tUSA\t58.67680167\t-156.6492175\nEYW\t34.559144436793844\tEYW\tKey West International\tKey West\tFL\tUSA\t24.55611111\t-81.75955556\nFAY\t33.98309151704866\tFAY\tFayetteville Municipal\tFayetteville\tNC\tUSA\t34.99147222\t-78.88\nORD\t33.738428974789535\tORD\tChicago O\u0027Hare International\tChicago\tIL\tUSA\t41.979595\t-87.90446417\nCIC\t33.20209048431289\tCIC\tChico Municipal\tChico\tCA\tUSA\t39.79538278\t-121.8584231\nGNV\t32.406392542333656\tGNV\tGainesville Regional\tGainesville\tFL\tUSA\t29.69005556\t-82.27177778\nAGS\t32.25718105884233\tAGS\tBush \tAugusta\tGA\tUSA\t33.369955\t-81.96449611\nTTN\t30.85796975616815\tTTN\tTrenton-Mercer County \tTrenton\tNJ\tUSA\t40.27669111\t-74.81346833\nDHN\t30.56898330479432\tDHN\tDothan \tDothan\tAL\tUSA\t31.32133917\t-85.44962889\nCAE\t30.168349100937082\tCAE\tColumbia Metropolitan\tColumbia\tSC\tUSA\t33.93884\t-81.11953944\nRDD\t30.05040493547509\tRDD\tRedding Municipal\tRedding\tCA\tUSA\t40.50898361\t-122.2934019\nILG\t29.807191860988567\tILG\tNew Castle County \tWilmington\tDE\tUSA\t39.67872222\t-75.60652778\nJFK\t29.746779522754935\tJFK\tJohn F Kennedy Intl\tNew York\tNY\tUSA\t40.63975111\t-73.77892556\nPFN\t29.515882342243078\tPFN\tPanama City-Bay County International\tPanama City\tFL\tUSA\t30.21208333\t-85.68280556\nAVP\t29.19378632077771\tAVP\tWilkes-Barre/Scranton Intl\tWilkes-Barre/Scranton\tPA\tUSA\t41.33814944\t-75.7242675\nPWM\t28.896620972543122\tPWM\tPortland International Jetport\tPortland\tME\tUSA\t43.64616667\t-70.30875\nVLD\t28.77198175385091\tVLD\tValdosta Regional\tValdosta\tGA\tUSA\t30.7825\t-83.27672222\nLGA\t28.715936157893207\tLGA\tLaGuardia\tNew York\tNY\tUSA\t40.77724306\t-73.87260917\nCMI\t28.597497509618773\tCMI\tUniversity of Illinois-Willard\tChampaign/Urbana\tIL\tUSA\t40.03925\t-88.27805556\nMEI\t28.467952521671382\tMEI\tKey \tMeridian\tMS\tUSA\t32.33313333\t-88.75120556\nEGE\t28.152619205909314\tEGE\tEagle County Regional\tEagle\tCO\tUSA\t39.64256778\t-106.9176953\nBMI\t28.138636739769026\tBMI\tCentral Illinois Regional\tBloomington\tIL\tUSA\t40.47798556\t-88.91595278\nCWA\t28.08763948156973\tCWA\tCentral Wisconsin\tMosinee\tWI\tUSA\t44.77761917\t-89.66677944\nBTV\t27.82185782688328\tBTV\tBurlington International\tBurlington\tVT\tUSA\t44.47300361\t-73.1503125\nACV\t27.7144469660886\tACV\tArcata\tArcata/Eureka\tCA\tUSA\t40.97811528\t-124.1086189\nCSG\t27.59826991442535\tCSG\tColumbus Metropolitan\tColumbus\tGA\tUSA\t32.51633333\t-84.93886111\nACY\t27.32368452392145\tACY\tAtlantic City International\tAtlantic City\tNJ\tUSA\t39.45758333\t-74.57716667\nOAJ\t27.261533249636315\tOAJ\tAlbert J Ellis\tJacksonville\tNC\tUSA\t34.82916444\t-77.61213778\nSBN\t27.156577198174315\tSBN\tSouth Bend Regional\tSouth Bend\tIN\tUSA\t41.70895361\t-86.31847417\nFLO\t27.108648940191998\tFLO\tFlorence Regional\tFlorence\tSC\tUSA\t34.18536111\t-79.72388889\nPHL\t26.982062758431834\tPHL\tPhiladelphia Intl\tPhiladelphia\tPA\tUSA\t39.87195278\t-75.24114083\nADK\t26.883915402622357\tADK\tAdak\tAdak\tAK\tUSA\t51.87796389\t-176.6460306\nBGR\t26.806251201488113\tBGR\tBangor International\tBangor\tME\tUSA\t44.80744444\t-68.82813889\nROA\t26.757317946518405\tROA\tRoanoke Regional/ Woodrum \tRoanoke\tVA\tUSA\t37.32546833\t-79.97542833\nMTH\t26.55696364567332\tMTH\tFlorida Keys Marathon\tMarathon\tFL\tUSA\t24.72614083\t-81.05137806\nROC\t26.439909584212216\tROC\tGreater Rochester Int\u0027l\tRochester\tNY\tUSA\t43.11886611\t-77.67238389\nGST\t26.108190476190476\tGST\tGustavus\tGustavus\tAK\tUSA\t58.42438139\t-135.7073814\nSGF\t26.06738424912803\tSGF\tSpringfield-Branson Regional\tSpringfield\tMO\tUSA\t37.24432611\t-93.38685806\nABY\t25.747002805896436\tABY\tSouthwest Georgia Regional\tAlbany\tGA\tUSA\t31.535515\t-84.19447333\nBQK\t25.54958627490035\tBQK\tGlynco Jetport\tBrunswick\tGA\tUSA\t31.25902778\t-81.46630556\nGTR\t25.059857286076547\tGTR\tGolden Triangle Regional\tColumbus-Starkville-West Point\tMS\tUSA\t33.45033444\t-88.59136861\nSFO\t25.00129632652838\tSFO\tSan Francisco International\tSan Francisco\tCA\tUSA\t37.61900194\t-122.3748433\nAPF\t24.984713724499308\tAPF\tNaples Municipal\tNaples\tFL\tUSA\t26.15247222\t-81.77544444\nMIA\t24.947422138959304\tMIA\tMiami International\tMiami\tFL\tUSA\t25.79325\t-80.29055556\nAVL\t24.603619510873532\tAVL\tAsheville Regional\tAsheville\tNC\tUSA\t35.43619444\t-82.54180556\nXNA\t24.503170965332448\tXNA\tNorthwest Arkansas Regional\tFayetteville/Springdale/Rogers\tAR\tUSA\t36.28186944\t-94.30681111\nVPS\t24.443611854739384\tVPS\tEglin Air Force Base\tValparaiso\tFL\tUSA\t30.48325\t-86.5254\nTVC\t24.370419206516864\tTVC\tCherry Capital\tTraverse City\tMI\tUSA\t44.74144472\t-85.582235\nPSG\t24.311902618382526\tPSG\tJames C. Johnson Petersburg\tPetersburg\tAK\tUSA\t56.80165194\t-132.9452781\nSYR\t24.301711755565982\tSYR\tSyracuse-Hancock Intl\tSyracuse\tNY\tUSA\t43.11118694\t-76.10631056\nMOD\t24.156821468505676\tMOD\tModesto City-County-Harry Sham \tModesto\tCA\tUSA\t37.62581722\t-120.9544214\nRIC\t24.029187904914068\tRIC\tRichmond International\tRichmond\tVA\tUSA\t37.50516667\t-77.31966667\nMDT\t23.915157048056546\tMDT\tHarrisburg Intl\tHarrisburg\tPA\tUSA\t40.19349528\t-76.76340361\nFWA\t23.76993260120135\tFWA\tFort Wayne International\tFort Wayne\tIN\tUSA\t40.97846583\t-85.19514639\nLNK\t23.66777477496737\tLNK\tLincoln Municipal\tLincoln\tNE\tUSA\t40.85097222\t-96.75925\nATW\t23.646113402280527\tATW\tOutagamie County Regional\tAppleton\tWI\tUSA\t44.25740806\t-88.51947556\nLIT\t23.592157414312524\tLIT\tAdams \tLittle Rock\tAR\tUSA\t34.72939611\t-92.22424556\nATL\t23.56324733883971\tATL\tWilliam B Hartsfield-Atlanta Intl\tAtlanta\tGA\tUSA\t33.64044444\t-84.42694444\nGSO\t23.485615058137295\tGSO\tPiedmont Triad International\tGreensboro\tNC\tUSA\t36.09774694\t-79.9372975\nHPN\t23.483862805535274\tHPN\tWestchester Cty\tWhite Plains\tNY\tUSA\t41.06695778\t-73.70757444\nBTR\t23.478748905561766\tBTR\tBaton Rouge Metropolitan, Ryan \tBaton Rouge\tLA\tUSA\t30.53316083\t-91.14963444\nIAD\t23.286234978288554\tIAD\tWashington Dulles International\tChantilly\tVA\tUSA\t38.94453194\t-77.45580972\nBUF\t23.135466255016386\tBUF\tBuffalo Niagara Intl\tBuffalo\tNY\tUSA\t42.94052472\t-78.73216667\nDLG\t23.129554655870447\tDLG\tDillingham\tDillingham\tAK\tUSA\t59.0454125\t-158.5033389\nMLU\t23.103197494097067\tMLU\tMonroe Regional\tMonroe\tLA\tUSA\t32.51086556\t-92.03768778\nMBS\t22.820959249254496\tMBS\tMbs International\tSaginaw\tMI\tUSA\t43.53291472\t-84.07964722\nASE\t22.725280780070428\tASE\tAspen-Pitkin Co/Sardy \tAspen\tCO\tUSA\t39.22316\t-106.868845\nBRW\t22.320831841508532\tBRW\tWiley Post Will Rogers Memorial\tBarrow\tAK\tUSA\t71.2854475\t-156.7660019\nILM\t22.317536455929876\tILM\tWilmington International\tWilmington\tNC\tUSA\t34.27061111\t-77.90255556\nSJU\t22.3128899101474\tSJU\tLuis Munoz Marin International\tSan Juan\tPR\tUSA\t18.43941667\t-66.00183333\nMSN\t22.28591584139791\tMSN\tDane County Regional\tMadison\tWI\tUSA\t43.13985778\t-89.33751361\nMLB\t22.225334783823925\tMLB\tMelbourne International \tMelbourne\tFL\tUSA\t28.10275\t-80.64580556\nSAV\t22.193575362647977\tSAV\tSavannah International\tSavannah\tGA\tUSA\t32.12758333\t-81.20213889\nORF\t22.16303819758234\tORF\tNorfolk International\tNorfolk\tVA\tUSA\t36.89461111\t-76.20122222\nMGM\t22.155576059750302\tMGM\tMontgomery Regional Apt\tMontgomery\tAL\tUSA\t32.30064417\t-86.39397611\nGRB\t22.067010970366262\tGRB\tAustin Straubel International\tGreen Bay\tWI\tUSA\t44.48507333\t-88.12959\nPIA\t22.04295502591578\tPIA\tGreater Peoria Regional\tPeoria\tIL\tUSA\t40.66424333\t-89.69330556\nMLI\t22.022969284123675\tMLI\tQuad City\tMoline\tIL\tUSA\t41.44852639\t-90.50753917\nCRW\t21.980360158029768\tCRW\tYeager\tCharleston\tWV\tUSA\t38.37315083\t-81.59318972\nMYR\t21.956500540199464\tMYR\tMyrtle Beach International\tMyrtle Beach\tSC\tUSA\t33.67975\t-78.92833333\nDAB\t21.83477030651546\tDAB\tDaytona Beach International\tDaytona Beach\tFL\tUSA\t29.17991667\t-81.05805556\nCMX\t21.811201445347788\tCMX\tHoughton County Memorial\tHancock\tMI\tUSA\t47.16841722\t-88.48906083\nCMH\t21.75678140567274\tCMH\tPort Columbus Intl\tColumbus\tOH\tUSA\t39.99798528\t-82.89188278\nEWN\t21.74857741280797\tEWN\tCraven County Regional\tNew Bern\tNC\tUSA\t35.07297222\t-77.04294444\nFSD\t21.656191703436864\tFSD\tJoe Foss \tSioux Falls\tSD\tUSA\t43.58135111\t-96.74170028\nCHS\t21.63819511113609\tCHS\tCharleston AFB/International\tCharleston\tSC\tUSA\t32.89864639\t-80.04050583\nTRI\t21.569046402132976\tTRI\tTri-Cities Regional\tBristol\tTN\tUSA\t36.47521417\t-82.40742056\nJAC\t21.530515200486846\tJAC\tJackson Hole\tJackson\tWY\tUSA\t43.60732417\t-110.7377389\nLWB\t21.473028980303972\tLWB\tGreenbrier Valley\tLewisburg\tWV\tUSA\t37.85830556\t-80.39947222\nBOS\t21.41746909176677\tBOS\tGen Edw L Logan Intl\tBoston\tMA\tUSA\t42.3643475\t-71.00517917\nCID\t21.263454394116593\tCID\tEastern Iowa \tCedar Rapids\tIA\tUSA\t41.88458833\t-91.71087222\nGSP\t21.21117882323246\tGSP\tGreenville-Spartanburg\tGreer\tSC\tUSA\t34.89566722\t-82.21885833\nDSM\t21.20473036890821\tDSM\tDes Moines International\tDes Moines\tIA\tUSA\t41.53493306\t-93.66068222\nSWF\t21.154841796321808\tSWF\tStewart\tNewburgh\tNY\tUSA\t41.50409361\t-74.10483833\nDFW\t20.98193287456471\tDFW\tDallas-Fort Worth International\tDallas-Fort Worth\tTX\tUSA\t32.89595056\t-97.0372\nRDU\t20.88309448505369\tRDU\tRaleigh-Durham International\tRaleigh\tNC\tUSA\t35.87763889\t-78.78747222\nALB\t20.87049161611916\tALB\tAlbany Cty\tAlbany\tNY\tUSA\t42.74811944\t-73.80297861\nICT\t20.809967258318114\tICT\tWichita Mid-Continent\tWichita\tKS\tUSA\t37.64995889\t-97.43304583\nLAN\t20.738672668931333\tLAN\tCapital City\tLansing\tMI\tUSA\t42.7787\t-84.58735806\nMKE\t20.688235443814953\tMKE\tGeneral Mitchell International\tMilwaukee\tWI\tUSA\t42.94722222\t-87.89658333\nJNU\t20.55477703286512\tJNU\tJuneau International\tJuneau\tAK\tUSA\t58.35496194\t-134.5762764\nLEX\t20.242323547850006\tLEX\tBlue Grass \tLexington\tKY\tUSA\t38.03697222\t-84.60538889\nRST\t20.1846357268074\tRST\tRochester International\tRochester\tMN\tUSA\t43.90882639\t-92.49798722\nCAK\t20.163114199533474\tCAK\tAkron-Canton Regional\tAkron\tOH\tUSA\t40.91631194\t-81.44246556\nCHA\t20.13195556405793\tCHA\tLovell \tChattanooga\tTN\tUSA\t35.03526833\t-85.20378778\nPHF\t20.12998717555145\tPHF\tNewport News/Williamsburg International\tNewport News\tVA\tUSA\t37.13189556\t-76.4929875\nSHV\t20.122581791280666\tSHV\tShreveport Regional\tShreveport\tLA\tUSA\t32.4466275\t-93.82559833\nPIT\t20.096293511962585\tPIT\tPittsburgh International\tPittsburgh\tPA\tUSA\t40.49146583\t-80.23287083\nSDF\t20.077450234838672\tSDF\tLouisville International-Standiford \tLouisville\tKY\tUSA\t38.17438889\t-85.736\nMKC\t20.0\tMKC\tDowntown\tKansas City\tMO\tUSA\t39.12324111\t-94.592735\nLYH\t19.901076451456696\tLYH\tLynchburg Municipal-Preston Glenn \tLynchburg\tVA\tUSA\t37.32668528\t-79.20043056\nOMA\t19.889057425400914\tOMA\tEppley Airfield\tOmaha\tNE\tUSA\t41.30251861\t-95.89417306\nAEX\t19.841095751135047\tAEX\tAlexandria International\tAlexandria\tLA\tUSA\t31.32737167\t-92.54855611\nMHT\t19.726781092145576\tMHT\tManchester\tManchester\tNH\tUSA\t42.93451639\t-71.43705583\nTUL\t19.599060951868005\tTUL\tTulsa International\tTulsa\tOK\tUSA\t36.19837222\t-95.88824167\nDBQ\t19.54833659033426\tDBQ\tDubuque Municipal\tDubuque\tIA\tUSA\t42.40295944\t-90.70916722\nMDW\t19.53515373314506\tMDW\tChicago Midway\tChicago\tIL\tUSA\t41.7859825\t-87.75242444\nTYS\t19.515210096799024\tTYS\tMcGhee-Tyson\tKnoxville\tTN\tUSA\t35.81248722\t-83.99285583\nTUP\t19.441750373555333\tTUP\tTupelo Municipal \tTupelo\tMS\tUSA\t34.26810833\t-88.769895\nABI\t19.382540264589718\tABI\tAbilene Regional\tAbilene\tTX\tUSA\t32.41132\t-99.68189722\nMFR\t19.36581860849264\tMFR\tRogue Valley International\tMedford\tOR\tUSA\t42.37422778\t-122.8734978\nSTX\t19.30561732970925\tSTX\tHenry E. Rohlsen \tChristiansted\tVI\tUSA\t17.70188889\t-64.79855556\nLBB\t19.243934167206447\tLBB\tLubbock International\tLubbock\tTX\tUSA\t33.66363889\t-101.8227778\nABE\t19.204839913992274\tABE\tLehigh Valley International\tAllentown\tPA\tUSA\t40.65236278\t-75.44040167\nLSE\t19.156505792492908\tLSE\tLa Crosse Municipal\tLa Crosse\tWI\tUSA\t43.87937972\t-91.25653778\nOKC\t18.965316300939477\tOKC\tWill Rogers World\tOklahoma City\tOK\tUSA\t35.39308833\t-97.60073389\nHOU\t18.841630198181786\tHOU\tWilliam P Hobby\tHouston\tTX\tUSA\t29.64541861\t-95.27888889\nPVD\t18.81634808856072\tPVD\tTheodore F Green State\tProvidence\tRI\tUSA\t41.72399917\t-71.42822111\nCLT\t18.8154529915751\tCLT\tCharlotte/Douglas International\tCharlotte\tNC\tUSA\t35.21401111\t-80.94312583\nTEX\t18.71978901363876\tTEX\tTelluride Regional\tTelluride\tCO\tUSA\t37.95375861\t-107.90848\nPBI\t18.69187795212079\tPBI\tPalm Beach International\tWest Palm Beach\tFL\tUSA\t26.68316194\t-80.09559417\nSEA\t18.688801234990862\tSEA\tSeattle-Tacoma Intl\tSeattle\tWA\tUSA\t47.44898194\t-122.3093131\nPNS\t18.67411108361419\tPNS\tPensacola Regional\tPensacola\tFL\tUSA\t30.47330556\t-87.18744444\nBNA\t18.667497437710338\tBNA\tNashville International\tNashville\tTN\tUSA\t36.12447667\t-86.67818222\nALO\t18.56821829855538\tALO\tWaterloo Municipal\tWaterloo\tIA\tUSA\t42.55708139\t-92.40034361\nGRR\t18.555997547139466\tGRR\tKent County International\tGrand Rapids\tMI\tUSA\t42.88081972\t-85.52276778\nANC\t18.54352199432165\tANC\tTed Stevens Anchorage International\tAnchorage\tAK\tUSA\t61.17432028\t-149.9961856\nWRG\t18.512376179829012\tWRG\tWrangell\tWrangell\tAK\tUSA\t56.48432583\t-132.3698242\nHDN\t18.429987462709725\tHDN\tYampa Valley\tHayden\tCO\tUSA\t40.48118028\t-107.2176597\nMOB\t18.428024334965958\tMOB\tMobile Regional\tMobile\tAL\tUSA\t30.69141667\t-88.24283333\nMAF\t18.412272174785095\tMAF\tMidland International\tMidland\tTX\tUSA\t31.94252778\t-102.2019139\nLFT\t18.374693006986703\tLFT\tLafayette Regional\tLafayette\tLA\tUSA\t30.20527972\t-91.987655\nKTN\t18.344847723682776\tKTN\tKetchikan International\tKetchikan\tAK\tUSA\t55.35556861\t-131.71374\nTOL\t18.32570645070101\tTOL\tToledo Express\tToledo\tOH\tUSA\t41.58680556\t-83.80783333\nBQN\t18.319170589551057\tBQN\tRafael Hernandez\tAguadilla\tPR\tUSA\t18.49486111\t-67.12944444\nFLL\t18.27608233004903\tFLL\tFort Lauderdale-Hollywood Int\u0027l\tFt. Lauderdale\tFL\tUSA\t26.07258333\t-80.15275\nGRK\t18.20181826023234\tGRK\tRobert Gray AAF\tKilleen\tTX\tUSA\t31.06489778\t-97.82779778\nJAN\t18.15782211043539\tJAN\tJackson International\tJackson\tMS\tUSA\t32.31116667\t-90.07588889\nLAS\t18.11525881709909\tLAS\tMcCarran International\tLas Vegas\tNV\tUSA\t36.08036111\t-115.1523333\nFNT\t18.076842865948013\tFNT\tBishop\tFlint\tMI\tUSA\t42.96550333\t-83.74345639\nGPT\t18.04444538343519\tGPT\tGulfport-Biloxi Regional\tGulfport-Biloxi\tMS\tUSA\t30.40728028\t-89.07009278\nHRL\t17.965875854245343\tHRL\tValley International\tHarlingen\tTX\tUSA\t26.22850611\t-97.65439389\nROW\t17.900673381377423\tROW\tRoswell Industrial Air Center\tRoswell\tNM\tUSA\t33.30155556\t-104.5305556\nEVV\t17.82287025500678\tEVV\tEvansville Regional\tEvansville\tIN\tUSA\t38.03799139\t-87.53062667\nIAH\t17.81818182990334\tIAH\tGeorge Bush Intercontinental\tHouston\tTX\tUSA\t29.98047222\t-95.33972222\nDTW\t17.788853369733268\tDTW\tDetroit Metropolitan-Wayne County\tDetroit\tMI\tUSA\t42.21205889\t-83.34883583\nHSV\t17.67538841254566\tHSV\tHuntsville International \tHuntsville\tAL\tUSA\t34.6404475\t-86.77310944\nSTT\t17.668190869442732\tSTT\tCyril E. King\tCharlotte Amalie\tVI\tUSA\t18.33730556\t-64.97336111\nOTZ\t17.66091829768653\tOTZ\tRalph Wien Memorial\tKotzebue\tAK\tUSA\t66.88467694\t-162.5985497\nDEN\t17.59690764497092\tDEN\tDenver Intl\tDenver\tCO\tUSA\t39.85840806\t-104.6670019\nDAL\t17.589455724189623\tDAL\tDallas Love \tDallas\tTX\tUSA\t32.84711389\t-96.85177222\nBHM\t17.585319018971212\tBHM\tBirmingham International\tBirmingham\tAL\tUSA\t33.56294306\t-86.75354972\nFAR\t17.55667427312968\tFAR\tHector International\tFargo\tND\tUSA\t46.91934889\t-96.81498889\nJAX\t17.533729783392094\tJAX\tJacksonville International\tJacksonville\tFL\tUSA\t30.49405556\t-81.68786111\nDAY\t17.411241577073547\tDAY\tJames M Cox Dayton Intl\tDayton\tOH\tUSA\t39.90237583\t-84.219375\nCRP\t17.39789105679923\tCRP\tCorpus Christi International\tCorpus Christi\tTX\tUSA\t27.77036083\t-97.50121528\nTLH\t17.337186642342658\tTLH\tTallahassee Regional\tTallahassee\tFL\tUSA\t30.39652778\t-84.35033333\nMCI\t17.26627710136726\tMCI\tKansas City International\tKansas City\tMO\tUSA\t39.29760528\t-94.71390556\nAMA\t17.22552455545941\tAMA\tAmarillo International\tAmarillo\tTX\tUSA\t35.2193725\t-101.7059272\nSIT\t17.185145371470497\tSIT\tSitka\tSitka\tAK\tUSA\t57.04713806\t-135.3615983\nSTL\t17.148953192697956\tSTL\tLambert-St Louis International\tSt Louis\tMO\tUSA\t38.74768694\t-90.35998972\nBDL\t17.069410151110713\tBDL\tBradley International\tWindsor Locks\tCT\tUSA\t41.93887417\t-72.68322833\nBWI\t17.040968967493995\tBWI\tBaltimore-Washington International\tBaltimore\tMD\tUSA\t39.17540167\t-76.66819833\nCOS\t16.99834282047731\tCOS\tCity of Colorado Springs Muni\tColorado Springs\tCO\tUSA\t38.80580556\t-104.70025\nFSM\t16.922244900853833\tFSM\tFort Smith Regional\tFort Smith\tAR\tUSA\t35.33659028\t-94.36744111\nCHO\t16.83401566183023\tCHO\tCharlottesville-Albermarle\tCharlottesville\tVA\tUSA\t38.13863889\t-78.45286111\nAZO\t16.78385935336541\tAZO\tKalamazoo County\tKalamazoo\tMI\tUSA\t42.234875\t-85.5520575\nCLE\t16.689625728590933\tCLE\tCleveland-Hopkins Intl\tCleveland\tOH\tUSA\t41.41089417\t-81.84939667\nIND\t16.373685259971783\tIND\tIndianapolis International\tIndianapolis\tIN\tUSA\t39.71732917\t-86.29438417\nMSP\t16.35438598757496\tMSP\tMinneapolis-St Paul Intl\tMinneapolis\tMN\tUSA\t44.88054694\t-93.2169225\nGUC\t16.316940890429205\tGUC\tGunnison County\tGunnison\tCO\tUSA\t38.53396333\t-106.9331817\nMCO\t16.23335186127255\tMCO\tOrlando International\tOrlando\tFL\tUSA\t28.42888889\t-81.31602778\nMSY\t16.175059128012464\tMSY\tNew Orleans International \tNew Orleans\tLA\tUSA\t29.99338889\t-90.25802778\nRSW\t16.153107229094733\tRSW\tSouthwest Florida International\tFt. Myers\tFL\tUSA\t26.53616667\t-81.75516667\nMFE\t16.099411261930726\tMFE\tMcAllen Miller International\tMcAllen\tTX\tUSA\t26.17583333\t-98.23861111\nAUS\t16.037183696449397\tAUS\tAustin-Bergstrom International\tAustin\tTX\tUSA\t30.19453278\t-97.66987194\nPMD\t16.022392837005413\tPMD\tPalmdale Production Flight\tPalmdale\tCA\tUSA\t34.62938889\t-118.0845528\nSAT\t15.809056588149645\tSAT\tSan Antonio International\tSan Antonio\tTX\tUSA\t29.53369444\t-98.46977778\nLRD\t15.712310900502274\tLRD\tLaredo International\tLaredo\tTX\tUSA\t27.54373861\t-99.46154361\nMEM\t15.711825947104089\tMEM\tMemphis International\tMemphis\tTN\tUSA\t35.04241667\t-89.97666667\nTXK\t15.638293726263758\tTXK\tTexarkana Regional-Webb \tTexarkana\tAR\tUSA\t33.45370806\t-93.99102\nLAX\t15.607592997889466\tLAX\tLos Angeles International\tLos Angeles\tCA\tUSA\t33.94253611\t-118.4080744\nOME\t15.544525476717709\tOME\tNome\tNome\tAK\tUSA\t64.51220222\t-165.4452458\nSCC\t15.528691912075786\tSCC\tDeadhorse\tDeadhorse\tAK\tUSA\t70.19475583\t-148.4651608\nTPA\t15.518990698364096\tTPA\tTampa International \tTampa\tFL\tUSA\t27.97547222\t-82.53325\nHKY\t15.434684684684687\tHKY\tHickory Municipal\tHickory\tNC\tUSA\t35.74114639\t-81.38954889\nSRQ\t15.414340589624484\tSRQ\tSarasota Bradenton International\tSarasota\tFL\tUSA\t27.39533333\t-82.55411111\nCDV\t15.30888745469272\tCDV\tMerle K (Mudhole) Smith\tCordova\tAK\tUSA\t60.49183389\t-145.4776503\nGGG\t15.26944136951817\tGGG\tGregg County\tLongview\tTX\tUSA\t32.38486111\t-94.71171\nSMF\t15.220972015084758\tSMF\tSacramento International\tSacramento\tCA\tUSA\t38.69542167\t-121.5907669\nGCC\t15.20798766943198\tGCC\tGillette-Campbell County\tGillette\tWY\tUSA\t44.34889806\t-105.5393614\nDCA\t15.076271875316788\tDCA\tRonald Reagan Washington National\tArlington\tVA\tUSA\t38.85208333\t-77.03772222\nRNO\t15.031026702539137\tRNO\tReno/Tahoe International\tReno\tNV\tUSA\t39.49857611\t-119.7680647\nBET\t15.024791386041915\tBET\tBethel\tBethel\tAK\tUSA\t60.77977639\t-161.8379975\nPSP\t14.92182726114019\tPSP\tPalm Springs International\tPalm Springs\tCA\tUSA\t33.82921556\t-116.5062531\nBGM\t14.787890445691119\tBGM\tBinghamton Regional\tBinghamton\tNY\tUSA\t42.20848278\t-75.97961361\nBRO\t14.457796477071236\tBRO\tBrownsville/S.Padre Island International\tBrownsville\tTX\tUSA\t25.90683333\t-97.42586111\nPHX\t14.377442740997921\tPHX\tPhoenix Sky Harbor International\tPhoenix\tAZ\tUSA\t33.43416667\t-112.0080556\nSJT\t14.374800523912974\tSJT\tSan Angelo Regional /Mathis \tSan Angelo\tTX\tUSA\t31.35775\t-100.4963056\nCLL\t14.235922804617108\tCLL\tEasterwood \tCollege Station\tTX\tUSA\t30.58858944\t-96.36382417\nPDX\t14.21689070109349\tPDX\tPortland Intl\tPortland\tOR\tUSA\t45.58872222\t-122.5975\nMTJ\t14.197290266916049\tMTJ\tMontrose Regional\tMontrose\tCO\tUSA\t38.50886722\t-107.8938333\nELP\t14.177670697862094\tELP\tEl Paso International\tEl Paso\tTX\tUSA\t31.80666667\t-106.3778056\nABQ\t14.175525776600022\tABQ\tAlbuquerque International\tAlbuquerque\tNM\tUSA\t35.04022222\t-106.6091944\nSLE\t14.086154448859295\tSLE\tMcNary Fld\tSalem\tOR\tUSA\t44.90952778\t-123.0025\nBZN\t14.034058273191043\tBZN\tGallatin \tBozeman\tMT\tUSA\t45.77690139\t-111.1530072\nTYR\t13.842915866270747\tTYR\tTyler Pounds \tTyler\tTX\tUSA\t32.35413889\t-95.40238611\nBUR\t13.81208829471256\tBUR\tBurbank-Glendale-Pasadena\tBurbank\tCA\tUSA\t34.20061917\t-118.3584969\nSUX\t13.800905502670071\tSUX\tSioux Gateway \tSioux City\tIA\tUSA\t42.40260333\t-96.38436694\nEUG\t13.791883614548832\tEUG\tMahlon Sweet \tEugene\tOR\tUSA\t44.12326\t-123.2186856\nBOI\t13.761986114331524\tBOI\tBoise Air Terminal\tBoise\tID\tUSA\t43.56444444\t-116.2227778\nISP\t13.672580569417025\tISP\tLong Island - MacArthur\tIslip\tNY\tUSA\t40.7952425\t-73.10021194\nOAK\t13.671837638276985\tOAK\tMetropolitan Oakland International\tOakland\tCA\tUSA\t37.72129083\t-122.2207167\nLCH\t13.609684567569058\tLCH\tLake Charles Regional\tLake Charles\tLA\tUSA\t30.1260975\t-93.22340361\nYKM\t13.458333333333334\tYKM\tYakima Air Terminal\tYakima\tWA\tUSA\t46.56816972\t-120.5440594\nSAN\t13.440900592947834\tSAN\tSan Diego International-Lindbergh \tSan Diego\tCA\tUSA\t32.73355611\t-117.1896567\nFAT\t13.336046830298821\tFAT\tFresno Yosemite International\tFresno\tCA\tUSA\t36.77619444\t-119.7181389\nTUS\t13.274173028196586\tTUS\tTucson International\tTucson\tAZ\tUSA\t32.11608333\t-110.9410278\nCVG\t13.169909603838377\tCVG\tCincinnati Northern Kentucky Intl\tCovington\tKY\tUSA\t39.04614278\t-84.6621725\nGFK\t13.091908965752365\tGFK\tGrand Forks International\tGrand Forks\tND\tUSA\t47.949255\t-97.17611111\nONT\t13.048087378634051\tONT\tOntario International\tOntario\tCA\tUSA\t34.056\t-117.6011944\nFAI\t13.010962941501912\tFAI\tFairbanks International\tFairbanks\tAK\tUSA\t64.8136775\t-147.8596694\nBIS\t12.891358424563471\tBIS\tBismarck Municipal\tBismarck\tND\tUSA\t46.77411111\t-100.7467222\nGEG\t12.775470299975243\tGEG\tSpokane Intl\tSpokane\tWA\tUSA\t47.61985556\t-117.5338425\nYUM\t12.723804458682475\tYUM\tYuma MCAS-Yuma International\tYuma\tAZ\tUSA\t32.65658333\t-114.6059722\nINL\t12.646151266141203\tINL\tFalls International\tInternational Falls\tMN\tUSA\t48.56618722\t-93.40306667\nERI\t12.542965315675668\tERI\tErie Intl\tErie\tPA\tUSA\t42.08202139\t-80.17621556\nMRY\t12.537897075398135\tMRY\tMonterey Peninsula\tMonterey\tCA\tUSA\t36.5869825\t-121.8429478\nSBP\t12.35197049824821\tSBP\tSan Luis Obispo Co-McChesney \tSan Luis Obispo\tCA\tUSA\t35.23705806\t-120.6423931\nYAK\t12.117050977242547\tYAK\tYakutat\tYakutat\tAK\tUSA\t59.50336056\t-139.6602261\nSJC\t12.064801449960111\tSJC\tSan Jose International\tSan Jose\tCA\tUSA\t37.36186194\t-121.9290089\nBPT\t12.05799468842947\tBPT\tSoutheast Texas Regional\tBeaumont/Port Arthur\tTX\tUSA\t29.95083333\t-94.02069444\nLAW\t11.915393071210651\tLAW\tLawton-Ft Sill Regional\tLawton\tOK\tUSA\t34.56771444\t-98.41663667\nRAP\t11.804524170624205\tRAP\tRapid City Regional\tRapid City\tSD\tUSA\t44.04532139\t-103.0573708\nGJT\t11.601114390395944\tGJT\tWalker \tGrand Junction\tCO\tUSA\t39.1224125\t-108.5267347\nDLH\t11.467929276845727\tDLH\tDuluth International\tDuluth\tMN\tUSA\t46.84209028\t-92.19364861\nRDM\t11.329447320669258\tRDM\tRoberts \tRedmond\tOR\tUSA\t44.25406722\t-121.1499633\nELM\t11.291984512251503\tELM\tElmira/Corning Regional\tElmira\tNY\tUSA\t42.15991361\t-76.89144333\nPLN\t11.193192231147002\tPLN\tPellston Regional  of Emmet County\tPellston\tMI\tUSA\t45.5709275\t-84.796715\nSPS\t11.151412565669562\tSPS\tSheppard AFB/Wichita Falls Municipal\tWichita Falls\tTX\tUSA\t33.98879611\t-98.49189333\nSNA\t11.126638018211086\tSNA\tJohn Wayne /Orange Co\tSanta Ana\tCA\tUSA\t33.67565861\t-117.8682225\nRFD\t11.088678653042887\tRFD\tGreater Rockford\tRockford\tIL\tUSA\t42.19536389\t-89.09721111\nSBA\t10.956238847327752\tSBA\tSanta Barbara Municipal\tSanta Barbara\tCA\tUSA\t34.42621194\t-119.8403733\nSCE\t10.92411498190072\tSCE\tUniversity Park\tNA\tNA\tUSA\t40.851206\t-77.846302\nMOT\t10.750033637909313\tMOT\tMinot International\tMinot\tND\tUSA\t48.25937778\t-101.2803339\nIPL\t10.597556640848303\tIPL\tImperial County\tImperial\tCA\tUSA\t32.83422028\t-115.5787456\nLGB\t10.452242999166362\tLGB\tLong Beach (Daugherty )\tLong Beach\tCA\tUSA\t33.81772222\t-118.1516111\nACT\t10.365964035526098\tACT\tWaco Regional\tWaco\tTX\tUSA\t31.61128833\t-97.23051917\nBFL\t10.357857548434062\tBFL\tMeadows \tBakersfield\tCA\tUSA\t35.43359806\t-119.0567681\nADQ\t10.295296865688737\tADQ\tKodiak \tKodiak\tAK\tUSA\t57.74996778\t-152.4938553\nBIL\t9.997669395171174\tBIL\tBillings Logan Intl\tBillings\tMT\tUSA\t45.8076625\t-108.5428611\nSLC\t9.905425728772126\tSLC\tSalt Lake City Intl\tSalt Lake City\tUT\tUSA\t40.78838778\t-111.9777731\nRHI\t9.644451070427575\tRHI\tRhinelander-Oneida County\tRhinelander\tWI\tUSA\t45.63119306\t-89.46745361\nDRO\t9.508456524422204\tDRO\tDurango-La Plata County\tDurango\tCO\tUSA\t37.15151667\t-107.7537692\nMSO\t9.460293096647987\tMSO\tMissoula International\tMissoula\tMT\tUSA\t46.91630556\t-114.0905556\nFLG\t9.431626987245927\tFLG\tFlagstaff Pulliam\tFlagstaff\tAZ\tUSA\t35.13845472\t-111.6712183\nPSE\t9.048452707206874\tPSE\tMercedita\tPonce\tPR\tUSA\t18.00830278\t-66.56301194\nPSC\t8.175606919095914\tPSC\tTri-Cities\tPasco\tWA\tUSA\t46.26468028\t-119.1190292\nBJI\t8.172175446580955\tBJI\tBemidji-Beltrami County\tBemidji\tMN\tUSA\t47.50942417\t-94.93372333\nCLD\t7.857160249204348\tCLD\tMC Clellan-Palomar Airport\tNA\tNA\tUSA\t33.127231\t-117.278727\nMKG\t7.415384615384616\tMKG\tMuskegon County\tMuskegon\tMI\tUSA\t43.16948806\t-86.23822306\nEAU\t7.406060606060606\tEAU\tChippewa Valley Regional\tEau Claire\tWI\tUSA\t44.86525722\t-91.48507194\nITH\t7.010569105691058\tITH\tTompkins Cty \tIthaca\tNY\tUSA\t42.49102778\t-76.45844444\nRKS\t6.845198845593455\tRKS\tRock Springs-Sweetwater County\tRock Springs\tWY\tUSA\t41.5942175\t-109.0651928\nFCA\t6.834385967825854\tFCA\tGlacier Park Intl\tKalispell\tMT\tUSA\t48.31140472\t-114.2550694\nCPR\t6.473260447325027\tCPR\tNatrona County Intl\tCasper\tWY\tUSA\t42.90835556\t-106.4644661\nSMX\t5.617247218968564\tSMX\tSanta Maria Pub/Capt G Allan Hancock \tSanta Maria\tCA\tUSA\t34.89924833\t-120.4575825\nGTF\t5.264023435159027\tGTF\tGreat Falls Intl\tGreat Falls\tMT\tUSA\t47.48200194\t-111.3706853\nLWS\t5.035223535223535\tLWS\tLewiston-Nez Perce County\tLewiston\tID\tUSA\t46.37449806\t-117.0153944\nIDA\t4.623329941821835\tIDA\tIdaho Falls Regional\tIdaho Falls\tID\tUSA\t43.51455556\t-112.0701667\nHLN\t4.498610692786459\tHLN\tHelena Regional\tHelena\tMT\tUSA\t46.60681806\t-111.9827503\nBLI\t4.481418220152391\tBLI\tBellingham Intl\tBellingham\tWA\tUSA\t48.79275\t-122.5375278\nSGU\t4.065045504600818\tSGU\tSt George Muni\tSt George\tUT\tUSA\t37.09058333\t-113.5930556\nOXR\t3.5570628739504944\tOXR\tOxnard\tOxnard\tCA\tUSA\t34.20080083\t-119.2072164\nHNL\t3.091277579732299\tHNL\tHonolulu International\tHonolulu\tHI\tUSA\t21.31869111\t-157.9224072\nOGG\t1.979442230790783\tOGG\tKahului\tKahului\tHI\tUSA\t20.89864972\t-156.4304578\nTWF\t1.5513889212692544\tTWF\tJoslin Field - Magic Valley\tTwin Falls\tID\tUSA\t42.48180389\t-114.4877356\nHTS\t1.5266895227058117\tHTS\tTri-State/Walker-Long \tHuntington\tWV\tUSA\t38.36666667\t-82.55802778\nKOA\t1.4006809413818293\tKOA\tKona International At Keahole\tKailua/Kona\tHI\tUSA\t19.73876583\t-156.0456314\nSUN\t1.368320105147172\tSUN\tFriedman Memorial\tHailey\tID\tUSA\t43.50484139\t-114.2965903\nBTM\t1.0789046145051535\tBTM\tBert Mooney\tButte\tMT\tUSA\t45.95479528\t-112.49746\nIYK\t0.4090139019533203\tIYK\tInyokern\tInyokern\tCA\tUSA\t35.65884306\t-117.8295122\nCOD\t0.3675946246672692\tCOD\tYellowstone Regional\tCody\tWY\tUSA\t44.52019417\t-109.0237961\nCDC\t-0.02490748393976694\tCDC\tCedar City Muni\tCedar City\tUT\tUSA\t37.70097028\t-113.098575\nEKO\t-0.30303462218066124\tEKO\tElko Regional\tElko\tNV\tUSA\t40.82492611\t-115.7916964\nWYS\t-1.1296350505846586\tWYS\tYellowstone\tWest Yellowstone\tMT\tUSA\t44.68839917\t-111.1176375\nLIH\t-1.5492960816040193\tLIH\tLihue\tLihue\tHI\tUSA\t21.97598306\t-159.3389581\nITO\t-1.8361703507831761\tITO\tHilo International\tHilo\tHI\tUSA\t19.72026306\t-155.0484703\nGLH\t-3.0\tGLH\tMid Delta Regional\tGreenville\tMS\tUSA\t33.48288111\t-90.98561389\nPIH\t-3.378354139839701\tPIH\tPocatello Regional\tPocatello\tID\tUSA\t42.91130556\t-112.5958611\nHVN\t-6.0\tHVN\tTweed-New Haven\tNew Haven\tCT\tUSA\t41.26389889\t-72.8871\n"
+          },
+          {
+            "type": "TEXT",
+            "data": ""
+          }
+        ]
+      },
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            "http://zenbook.home:4040/jobs/job?id\u003d49",
+            "http://zenbook.home:4040/jobs/job?id\u003d50"
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "apps": [],
+      "jobName": "paragraph_1551993828475_-49199637",
+      "id": "20190307-222348_1564280672",
+      "dateCreated": "2019-03-07 22:23:48.475",
+      "dateStarted": "2019-03-10 15:29:50.241",
+      "dateFinished": "2019-03-10 15:30:38.823",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%sql select * from df4g order by TotalDelay desc limit 3",
+      "user": "anonymous",
+      "dateUpdated": "2019-03-10 16:03:41.503",
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "multiBarChart",
+              "height": 300.0,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "Origin": "string",
+                      "TotalDelay": "string",
+                      "iata": "string",
+                      "airport": "string",
+                      "city": "string",
+                      "state": "string",
+                      "country": "string",
+                      "lat": "string",
+                      "long": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                },
+                "multiBarChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                }
+              },
+              "commonSetting": {},
+              "keys": [
+                {
+                  "name": "airport",
+                  "index": 3.0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": [
+                {
+                  "name": "TotalDelay",
+                  "index": 1.0,
+                  "aggr": "sum"
+                }
+              ]
+            },
+            "helium": {}
+          }
+        },
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/sql",
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TABLE",
+            "data": "Origin\tTotalDelay\tiata\tairport\tcity\tstate\tcountry\tlat\tlong\nACK\t63.36926340940924\tACK\tNantucket Memorial\tNantucket\tMA\tUSA\t41.25305194\t-70.06018139\nSOP\t50.839747846894994\tSOP\tMoore County\tPinehurst/Southern Pines\tNC\tUSA\t35.23735278\t-79.39116944\nOTH\t48.38306451612903\tOTH\tNorth Bend Muni\tNorth Bend\tOR\tUSA\t43.41713889\t-124.2460278\n"
+          },
+          {
+            "type": "TEXT",
+            "data": ""
+          }
+        ]
+      },
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            "http://zenbook.home:4040/jobs/job?id\u003d51",
+            "http://zenbook.home:4040/jobs/job?id\u003d52"
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "apps": [],
+      "jobName": "paragraph_1551994759907_1548479665",
+      "id": "20190307-223919_1968098608",
+      "dateCreated": "2019-03-07 22:39:19.907",
+      "dateStarted": "2019-03-10 15:29:52.946",
+      "dateFinished": "2019-03-10 15:31:26.686",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    }
+  ],
+  "name": "/M2SID/Spark/Perrin/scriptscala2",
+  "id": "2E51JNXK2",
+  "noteParams": {},
+  "noteForms": {},
+  "angularObjects": {
+    "md:shared_process": [],
+    "spark:shared_process": []
+  },
+  "config": {
+    "isZeppelinNotebookCronEnable": false
+  },
+  "info": {}
+}
