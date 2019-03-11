@@ -77,8 +77,13 @@ req3.sort(asc("AvgDelay")).select("Month").limit(1).show
 // Q2: cause principale de retard
 val col2 = Array("CarrierDelay","WeatherDelay","NASDelay","SecurityDelay","LateAircraftDelay")
 
+println("Première interprétation :")
 val df2 = col2.map { name:String => (name, df.filter(name+">0").count)}.toSeq.toDF("Name","CountDelay")
 df2.sort(desc("CountDelay")).show
+
+println("Seconde interprétation :")
+val df2_1 = col2.map {name:String => (name,df.select(sum(df(name))).first.getLong(0)) }.toSeq.toDF("Name","CountDelay")
+df2_1.sort(desc("CountDelay")).show
 
 // --------------------------------------------------------
 
@@ -128,15 +133,17 @@ val df4 = df.select(col("Origin"),col("Dest"),col("ArrDelay").cast("double"),col
 val df4o = df4.groupBy("Origin").agg(avg("DepDelay").as("DepDelay"))
 val df4d = df4.groupBy("Dest").agg(avg("ArrDelay").as("ArrDelay"))
 
-val df4g = df4o
+// Somme totale des retards
+/* val df4g = df4o
     .join(df4d,df4o("Origin")===df4d("Dest"))
     .groupBy("Origin")
-    .agg((avg("DepDelay")+avg("ArrDelay")).as("TotalDelay")) //avg nécéssaire pour compiler
+    .agg((avg("DepDelay")+avg("ArrDelay")).as("TotalDelay")) */
 
 // On utilise le fichier des aéroports pour obtenir le nom des aéroports concernés
-df4g
-    .join(df_airports,df4g("Origin")===df_airports("iata"))
-    .select("Origin","airport","TotalDelay")
-    .sort(desc("TotalDelay"))
+println("Aéroports les plus sujets aux retards de départ")
+df4o
+    .join(df_airports,df4o("Origin")===df_airports("iata"))
+    .select("Origin","airport","DepDelay")
+    .sort(desc("DepDelay"))
     .limit(3)
     .show(false)

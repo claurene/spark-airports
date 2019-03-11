@@ -4,7 +4,7 @@
       "title": "Chargement des données",
       "text": "// Charger les 3 fichiers (2006, 2007 et 2008)\nval df \u003d spark.read.format(\"csv\")\n    .option(\"header\", \"true\")\n    .option(\"inferSchema\", \"true\")\n    .load(\"/home/laurene/Documents/M2 MIAGE/CM Big Data/data/full/*.csv\")\n// Afficher les colonnes de la dataframe\ndf.printSchema\n\n// Charger les fichiers complémentaires\nval df_airports \u003d spark.read.format(\"csv\")\n    .option(\"header\", \"true\")\n    .option(\"inferSchema\", \"true\")\n    .load(\"/home/laurene/Documents/M2 MIAGE/CM Big Data/data/airports.csv\")\ndf_airports.printSchema\n\nval df_carriers \u003d spark.read.format(\"csv\")\n    .option(\"header\", \"true\")\n    .option(\"inferSchema\", \"true\")\n    .load(\"/home/laurene/Documents/M2 MIAGE/CM Big Data/data/carriers.csv\")\ndf_carriers.printSchema",
       "user": "anonymous",
-      "dateUpdated": "2019-03-10 15:18:29.404",
+      "dateUpdated": "2019-03-11 23:46:01.663",
       "config": {
         "editorSetting": {
           "language": "scala",
@@ -40,12 +40,12 @@
           "tooltip": "View in Spark web UI",
           "group": "spark",
           "values": [
-            "http://zenbook.home:4040/jobs/job?id\u003d0",
-            "http://zenbook.home:4040/jobs/job?id\u003d1",
-            "http://zenbook.home:4040/jobs/job?id\u003d2",
-            "http://zenbook.home:4040/jobs/job?id\u003d3",
-            "http://zenbook.home:4040/jobs/job?id\u003d4",
-            "http://zenbook.home:4040/jobs/job?id\u003d5"
+            "http://zenbook.home:4040/jobs/job?id\u003d68",
+            "http://zenbook.home:4040/jobs/job?id\u003d69",
+            "http://zenbook.home:4040/jobs/job?id\u003d70",
+            "http://zenbook.home:4040/jobs/job?id\u003d71",
+            "http://zenbook.home:4040/jobs/job?id\u003d72",
+            "http://zenbook.home:4040/jobs/job?id\u003d73"
           ],
           "interpreterSettingId": "spark"
         }
@@ -54,8 +54,8 @@
       "jobName": "paragraph_1551992625305_1502814403",
       "id": "20190307-152803_273982843",
       "dateCreated": "2019-03-07 22:03:45.305",
-      "dateStarted": "2019-03-10 15:18:29.531",
-      "dateFinished": "2019-03-10 15:19:41.144",
+      "dateStarted": "2019-03-11 23:46:01.691",
+      "dateFinished": "2019-03-11 23:47:17.361",
       "status": "FINISHED",
       "progressUpdateIntervalMs": 500
     },
@@ -63,7 +63,7 @@
       "title": "Q1: Quel est le meilleur moment (jour, jour de la semaine, mois) pour partir si on veut minimiser les retards ?",
       "text": "val df1 \u003d df\n    .withColumn(\"ArrDelay\", col(\"ArrDelay\").cast(\"double\"))\n    .filter($\"Cancelled\" \u003d!\u003d 1 \u0026\u0026 $\"Diverted\" \u003d!\u003d 1)\n    .na.fill(0,Seq(\"ArrDelay\"))\n\n// On créé également des fonctions pour formatter le jour et le mois\ndef jourSemaineUDF \u003d udf { (day:Int) \u003d\u003e\n    day match {\n        case 1 \u003d\u003e \"Lundi\"\n        case 2 \u003d\u003e \"Mardi\"\n        case 3 \u003d\u003e \"Mercredi\"\n        case 4 \u003d\u003e \"Jeudi\"\n        case 5 \u003d\u003e \"Vendredi\"\n        case 6 \u003d\u003e \"Samedi\"\n        case 7 \u003d\u003e \"Dimanche\"\n    }\n}\n\ndef moisUDF \u003d udf { (day:Int) \u003d\u003e\n    day match {\n        case 1 \u003d\u003e \"Janvier\"\n        case 2 \u003d\u003e \"Février\"\n        case 3 \u003d\u003e \"Mars\"\n        case 4 \u003d\u003e \"Avril\"\n        case 5 \u003d\u003e \"Mai\"\n        case 6 \u003d\u003e \"Juin\"\n        case 7 \u003d\u003e \"Juillet\"\n        case 8 \u003d\u003e \"Août\"\n        case 9 \u003d\u003e \"Septembre\"\n        case 10 \u003d\u003e \"Octobre\"\n        case 11 \u003d\u003e \"Novembre\"\n        case 12 \u003d\u003e \"Décembre\"\n    }\n}\n\n// Meilleur jour\nval req1 \u003d df1.groupBy(\"DayOfMonth\").agg(avg(\"ArrDelay\").as(\"AvgDelay\"))\nprintln(\"Meilleur jour du mois :\")\nreq1.sort(asc(\"AvgDelay\")).select(\"DayOfMonth\").limit(1).show\n\n// Meilleur jour de la semaine\nval req2 \u003d df1.groupBy(\"DayOfWeek\").agg(avg(\"ArrDelay\").as(\"AvgDelay\")).withColumn(\"DayOfWeek\",jourSemaineUDF(col(\"DayOfWeek\")))\nprintln(\"Meilleur jour de la semaine :\")\nreq2.sort(asc(\"AvgDelay\")).select(\"DayOfWeek\").limit(1).show\n\n// Meilleur mois\nval req3 \u003d df1.groupBy(\"Month\").agg(avg(\"ArrDelay\").as(\"AvgDelay\")).withColumn(\"Month\",moisUDF(col(\"Month\")))\nprintln(\"Meilleur mois :\")\nreq3.sort(asc(\"AvgDelay\")).select(\"Month\").limit(1).show",
       "user": "anonymous",
-      "dateUpdated": "2019-03-10 15:19:41.196",
+      "dateUpdated": "2019-03-11 23:19:57.573",
       "config": {
         "tableHide": false,
         "editorSetting": {
@@ -119,15 +119,15 @@
       "jobName": "paragraph_1551992625306_155721089",
       "id": "20190307-154417_693262790",
       "dateCreated": "2019-03-07 22:03:45.306",
-      "dateStarted": "2019-03-10 15:19:41.298",
-      "dateFinished": "2019-03-10 15:20:52.842",
+      "dateStarted": "2019-03-11 23:19:57.700",
+      "dateFinished": "2019-03-11 23:21:07.859",
       "status": "FINISHED",
       "progressUpdateIntervalMs": 500
     },
     {
       "text": "req2.registerTempTable(\"req2\")\nreq3.registerTempTable(\"req3\")",
       "user": "anonymous",
-      "dateUpdated": "2019-03-10 15:20:52.857",
+      "dateUpdated": "2019-03-11 23:21:07.883",
       "config": {
         "colWidth": 12.0,
         "fontSize": 9.0,
@@ -159,15 +159,15 @@
       "jobName": "paragraph_1551993327022_1303566794",
       "id": "20190307-221527_436154575",
       "dateCreated": "2019-03-07 22:15:27.022",
-      "dateStarted": "2019-03-10 15:20:52.997",
-      "dateFinished": "2019-03-10 15:20:53.357",
+      "dateStarted": "2019-03-11 23:21:08.043",
+      "dateFinished": "2019-03-11 23:21:08.515",
       "status": "FINISHED",
       "progressUpdateIntervalMs": 500
     },
     {
       "text": "%sql select * from req2 order by AvgDelay asc",
       "user": "anonymous",
-      "dateUpdated": "2019-03-10 16:03:41.079",
+      "dateUpdated": "2019-03-11 23:27:58.082",
       "config": {
         "colWidth": 12.0,
         "fontSize": 9.0,
@@ -266,15 +266,15 @@
       "jobName": "paragraph_1551994143272_-942601726",
       "id": "20190307-222903_2063891419",
       "dateCreated": "2019-03-07 22:29:03.272",
-      "dateStarted": "2019-03-10 15:20:53.548",
-      "dateFinished": "2019-03-10 15:21:15.904",
+      "dateStarted": "2019-03-11 23:21:08.711",
+      "dateFinished": "2019-03-11 23:21:30.573",
       "status": "FINISHED",
       "progressUpdateIntervalMs": 500
     },
     {
       "text": "%sql select * from req3 order by AvgDelay asc",
       "user": "anonymous",
-      "dateUpdated": "2019-03-10 16:03:41.167",
+      "dateUpdated": "2019-03-11 23:27:58.124",
       "config": {
         "colWidth": 12.0,
         "fontSize": 9.0,
@@ -373,8 +373,8 @@
       "jobName": "paragraph_1551994284185_-2035658693",
       "id": "20190307-223124_190308684",
       "dateCreated": "2019-03-07 22:31:24.185",
-      "dateStarted": "2019-03-10 15:21:16.030",
-      "dateFinished": "2019-03-10 15:21:38.447",
+      "dateStarted": "2019-03-11 23:21:30.743",
+      "dateFinished": "2019-03-11 23:21:52.210",
       "status": "FINISHED",
       "progressUpdateIntervalMs": 500
     },
@@ -382,7 +382,7 @@
       "title": "Q2:  Quelles sont les causes principales de retard ? (âge des avions, météo, compagnie...) ?",
       "text": "val col2 \u003d Array(\"CarrierDelay\",\"WeatherDelay\",\"NASDelay\",\"SecurityDelay\",\"LateAircraftDelay\")\n\nval df2 \u003d col2.map { name:String \u003d\u003e (name, df.filter(name+\"\u003e0\").count)}.toSeq.toDF(\"Name\",\"CountDelay\")\ndf2.sort(desc(\"CountDelay\")).show",
       "user": "anonymous",
-      "dateUpdated": "2019-03-10 15:21:38.449",
+      "dateUpdated": "2019-03-11 23:21:52.242",
       "config": {
         "editorSetting": {
           "language": "scala",
@@ -432,15 +432,15 @@
       "jobName": "paragraph_1551992625307_1638813339",
       "id": "20190307-160822_2129266388",
       "dateCreated": "2019-03-07 22:03:45.307",
-      "dateStarted": "2019-03-10 15:21:38.598",
-      "dateFinished": "2019-03-10 15:23:07.430",
+      "dateStarted": "2019-03-11 23:21:52.350",
+      "dateFinished": "2019-03-11 23:23:24.197",
       "status": "FINISHED",
       "progressUpdateIntervalMs": 500
     },
     {
       "text": "df2.registerTempTable(\"df2\")",
       "user": "anonymous",
-      "dateUpdated": "2019-03-10 15:23:07.471",
+      "dateUpdated": "2019-03-11 23:23:24.251",
       "config": {
         "colWidth": 12.0,
         "fontSize": 9.0,
@@ -472,15 +472,15 @@
       "jobName": "paragraph_1551993363557_202570938",
       "id": "20190307-221603_493431615",
       "dateCreated": "2019-03-07 22:16:03.558",
-      "dateStarted": "2019-03-10 15:23:07.600",
-      "dateFinished": "2019-03-10 15:23:07.917",
+      "dateStarted": "2019-03-11 23:23:24.379",
+      "dateFinished": "2019-03-11 23:23:24.644",
       "status": "FINISHED",
       "progressUpdateIntervalMs": 500
     },
     {
       "text": "%sql select * from df2 order by CountDelay desc",
       "user": "anonymous",
-      "dateUpdated": "2019-03-10 15:23:07.982",
+      "dateUpdated": "2019-03-11 23:23:24.660",
       "config": {
         "colWidth": 12.0,
         "fontSize": 9.0,
@@ -579,8 +579,172 @@
       "jobName": "paragraph_1551994322475_-1465054453",
       "id": "20190307-223202_87017720",
       "dateCreated": "2019-03-07 22:32:02.475",
-      "dateStarted": "2019-03-10 15:23:08.086",
-      "dateFinished": "2019-03-10 15:23:08.222",
+      "dateStarted": "2019-03-11 23:23:24.799",
+      "dateFinished": "2019-03-11 23:23:24.899",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Autre interprétation",
+      "text": "val df2_1 \u003d col2.map {name:String \u003d\u003e (name,df.select(sum(df(name))).first.getDouble(0)) }.toSeq.toDF(\"Name\",\"CountDelay\")\ndf2_1.sort(desc(\"CountDelay\")).show\n\ndf2_1.registerTempTable(\"df2_1\")\n",
+      "user": "anonymous",
+      "dateUpdated": "2019-03-11 23:23:24.996",
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/scala",
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "warning: there was one deprecation warning; re-run with -deprecation for details\n+-----------------+-----------+\n|             Name| CountDelay|\n+-----------------+-----------+\n|LateAircraftDelay|  1.01921E8|\n|         NASDelay|7.9982962E7|\n|     CarrierDelay|7.7111945E7|\n|     WeatherDelay|1.5227209E7|\n|    SecurityDelay|   512593.0|\n+-----------------+-----------+\n\ndf2_1: org.apache.spark.sql.DataFrame \u003d [Name: string, CountDelay: double]\n"
+          }
+        ]
+      },
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            "http://zenbook.home:4040/jobs/job?id\u003d18",
+            "http://zenbook.home:4040/jobs/job?id\u003d19",
+            "http://zenbook.home:4040/jobs/job?id\u003d20",
+            "http://zenbook.home:4040/jobs/job?id\u003d21",
+            "http://zenbook.home:4040/jobs/job?id\u003d22",
+            "http://zenbook.home:4040/jobs/job?id\u003d23"
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "apps": [],
+      "jobName": "paragraph_1552340582916_-413005635",
+      "id": "20190311-224302_1430863013",
+      "dateCreated": "2019-03-11 22:43:02.916",
+      "dateStarted": "2019-03-11 23:23:25.086",
+      "dateFinished": "2019-03-11 23:25:28.717",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%sql select * from df2_1 order by CountDelay desc\n",
+      "user": "anonymous",
+      "dateUpdated": "2019-03-11 23:25:28.797",
+      "config": {
+        "colWidth": 12.0,
+        "fontSize": 9.0,
+        "enabled": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "pieChart",
+              "height": 300.0,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "Name": "string",
+                      "CountDelay": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                },
+                "multiBarChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                }
+              },
+              "commonSetting": {},
+              "keys": [
+                {
+                  "name": "Name",
+                  "index": 0.0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": [
+                {
+                  "name": "CountDelay",
+                  "index": 1.0,
+                  "aggr": "sum"
+                }
+              ]
+            },
+            "helium": {}
+          }
+        },
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/sql"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TABLE",
+            "data": "Name\tCountDelay\nLateAircraftDelay\t1.01921E8\nNASDelay\t7.9982962E7\nCarrierDelay\t7.7111945E7\nWeatherDelay\t1.5227209E7\nSecurityDelay\t512593.0\n"
+          },
+          {
+            "type": "TEXT",
+            "data": ""
+          }
+        ]
+      },
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            "http://zenbook.home:4040/jobs/job?id\u003d24"
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "apps": [],
+      "jobName": "paragraph_1552340580131_239197319",
+      "id": "20190311-224300_1553315557",
+      "dateCreated": "2019-03-11 22:43:00.131",
+      "dateStarted": "2019-03-11 23:25:28.848",
+      "dateFinished": "2019-03-11 23:25:28.926",
       "status": "FINISHED",
       "progressUpdateIntervalMs": 500
     },
@@ -588,7 +752,7 @@
       "title": "Q3: Quelles sont les compagnies les plus/moins sujettes aux retards (5 groupes)",
       "text": "val df3 \u003d df\n    .select(col(\"UniqueCarrier\"),col(\"ArrDelay\").cast(\"double\"),col(\"DepDelay\").cast(\"double\"))\n    .filter($\"Cancelled\" \u003d!\u003d 1 \u0026\u0026 $\"Diverted\" \u003d!\u003d 1)\n    .na.fill(0,Seq(\"ArrDelay\"))\n    .na.fill(0,Seq(\"DepDelay\"))\n\nval df3g \u003d df3.groupBy(\"UniqueCarrier\").agg(avg(\"ArrDelay\").as(\"ArrDelay\"),avg(\"DepDelay\").as(\"DepDelay\"))\n\n// K-means\nimport org.apache.spark.ml.feature.VectorAssembler\nimport org.apache.spark.ml.clustering.{KMeans,KMeansModel}\nimport org.apache.spark.ml.Pipeline\n\nval assembler \u003d new VectorAssembler().setInputCols(Array(\"ArrDelay\",\"DepDelay\")).setOutputCol(\"features\")\nval kmeans \u003d new KMeans().setK(5).setFeaturesCol(\"features\").setPredictionCol(\"prediction\")\nval pipeline \u003d new Pipeline().setStages(Array(assembler, kmeans))\nval model \u003d pipeline.fit(df3g)\nval predictions \u003d model.transform(df3g)\n\n// Afficher les coordonées des clusters pour caractériser les différents groupes\nmodel.stages.last.asInstanceOf[KMeansModel].clusterCenters.foreach(println)",
       "user": "anonymous",
-      "dateUpdated": "2019-03-10 15:23:08.268",
+      "dateUpdated": "2019-03-11 23:25:28.948",
       "config": {
         "editorSetting": {
           "language": "scala",
@@ -613,7 +777,7 @@
         "msg": [
           {
             "type": "TEXT",
-            "data": "[6.106280676890199,7.027108939759698]\n[-0.6122804308610512,-0.2377525587749199]\n[11.334688358265883,12.19582286155677]\n[7.654144663034837,8.729630494036641]\n[14.879534459720709,14.5144340403966]\ndf3: org.apache.spark.sql.DataFrame \u003d [UniqueCarrier: string, ArrDelay: double ... 1 more field]\ndf3g: org.apache.spark.sql.DataFrame \u003d [UniqueCarrier: string, ArrDelay: double ... 1 more field]\nimport org.apache.spark.ml.feature.VectorAssembler\nimport org.apache.spark.ml.clustering.{KMeans, KMeansModel}\nimport org.apache.spark.ml.Pipeline\nassembler: org.apache.spark.ml.feature.VectorAssembler \u003d vecAssembler_06039e3a7ad9\nkmeans: org.apache.spark.ml.clustering.KMeans \u003d kmeans_908fbbbc8c73\npipeline: org.apache.spark.ml.Pipeline \u003d pipeline_881c1f210769\nmodel: org.apache.spark.ml.PipelineModel \u003d pipeline_881c1f210769\npredictions: org.apache.spark.sql.DataFrame \u003d [UniqueCarrier: string, ArrDelay: double ... 3 more fields]\n"
+            "data": "[6.106280676890199,7.027108939759698]\n[-0.6122804308610512,-0.2377525587749199]\n[11.334688358265883,12.19582286155677]\n[7.654144663034837,8.729630494036641]\n[14.879534459720709,14.5144340403966]\ndf3: org.apache.spark.sql.DataFrame \u003d [UniqueCarrier: string, ArrDelay: double ... 1 more field]\ndf3g: org.apache.spark.sql.DataFrame \u003d [UniqueCarrier: string, ArrDelay: double ... 1 more field]\nimport org.apache.spark.ml.feature.VectorAssembler\nimport org.apache.spark.ml.clustering.{KMeans, KMeansModel}\nimport org.apache.spark.ml.Pipeline\nassembler: org.apache.spark.ml.feature.VectorAssembler \u003d vecAssembler_f654d33ec860\nkmeans: org.apache.spark.ml.clustering.KMeans \u003d kmeans_578edd0188cf\npipeline: org.apache.spark.ml.Pipeline \u003d pipeline_7f862c517bee\nmodel: org.apache.spark.ml.PipelineModel \u003d pipeline_7f862c517bee\npredictions: org.apache.spark.sql.DataFrame \u003d [UniqueCarrier: string, ArrDelay: double ... 3 more fields]\n"
           }
         ]
       },
@@ -624,16 +788,16 @@
           "tooltip": "View in Spark web UI",
           "group": "spark",
           "values": [
-            "http://zenbook.home:4040/jobs/job?id\u003d18",
-            "http://zenbook.home:4040/jobs/job?id\u003d19",
-            "http://zenbook.home:4040/jobs/job?id\u003d20",
-            "http://zenbook.home:4040/jobs/job?id\u003d21",
-            "http://zenbook.home:4040/jobs/job?id\u003d22",
-            "http://zenbook.home:4040/jobs/job?id\u003d23",
-            "http://zenbook.home:4040/jobs/job?id\u003d24",
             "http://zenbook.home:4040/jobs/job?id\u003d25",
             "http://zenbook.home:4040/jobs/job?id\u003d26",
-            "http://zenbook.home:4040/jobs/job?id\u003d27"
+            "http://zenbook.home:4040/jobs/job?id\u003d27",
+            "http://zenbook.home:4040/jobs/job?id\u003d28",
+            "http://zenbook.home:4040/jobs/job?id\u003d29",
+            "http://zenbook.home:4040/jobs/job?id\u003d30",
+            "http://zenbook.home:4040/jobs/job?id\u003d31",
+            "http://zenbook.home:4040/jobs/job?id\u003d32",
+            "http://zenbook.home:4040/jobs/job?id\u003d33",
+            "http://zenbook.home:4040/jobs/job?id\u003d34"
           ],
           "interpreterSettingId": "spark"
         }
@@ -642,15 +806,15 @@
       "jobName": "paragraph_1551992625309_-1679044683",
       "id": "20190307-161007_957718697",
       "dateCreated": "2019-03-07 22:03:45.309",
-      "dateStarted": "2019-03-10 15:23:08.382",
-      "dateFinished": "2019-03-10 15:24:09.440",
+      "dateStarted": "2019-03-11 23:25:29.063",
+      "dateFinished": "2019-03-11 23:26:32.002",
       "status": "FINISHED",
       "progressUpdateIntervalMs": 500
     },
     {
       "text": "%md\nLes centres des clusters nous ont permis de déterminer les groupes de compagnies les plus/moins sujettes aux retards.\nD\u0027après le résultat précédent, le groupe 1 contient les compagnies les mois sujettes aux retards tandis que le groupe 4 contient celles les plus sujettes. Nous allons représenter ces groupes sur le schéma suivant :",
       "user": "anonymous",
-      "dateUpdated": "2019-03-10 15:24:09.530",
+      "dateUpdated": "2019-03-11 23:26:32.039",
       "config": {
         "colWidth": 12.0,
         "fontSize": 9.0,
@@ -683,15 +847,15 @@
       "jobName": "paragraph_1551994982657_815976253",
       "id": "20190307-224302_293179387",
       "dateCreated": "2019-03-07 22:43:02.657",
-      "dateStarted": "2019-03-10 15:24:09.642",
-      "dateFinished": "2019-03-10 15:24:12.152",
+      "dateStarted": "2019-03-11 23:26:32.127",
+      "dateFinished": "2019-03-11 23:26:34.611",
       "status": "FINISHED",
       "progressUpdateIntervalMs": 500
     },
     {
       "text": "predictions.registerTempTable(\"predictions\")",
       "user": "anonymous",
-      "dateUpdated": "2019-03-10 15:24:12.230",
+      "dateUpdated": "2019-03-11 23:26:34.621",
       "config": {
         "colWidth": 12.0,
         "fontSize": 9.0,
@@ -723,15 +887,15 @@
       "jobName": "paragraph_1551993382961_401692969",
       "id": "20190307-221622_911182922",
       "dateCreated": "2019-03-07 22:16:22.961",
-      "dateStarted": "2019-03-10 15:24:12.334",
-      "dateFinished": "2019-03-10 15:24:12.590",
+      "dateStarted": "2019-03-11 23:26:34.731",
+      "dateFinished": "2019-03-11 23:26:35.248",
       "status": "FINISHED",
       "progressUpdateIntervalMs": 500
     },
     {
       "text": "%sql select * from predictions",
       "user": "anonymous",
-      "dateUpdated": "2019-03-10 15:24:12.625",
+      "dateUpdated": "2019-03-11 23:26:35.317",
       "config": {
         "colWidth": 12.0,
         "fontSize": 9.0,
@@ -819,11 +983,11 @@
           "tooltip": "View in Spark web UI",
           "group": "spark",
           "values": [
-            "http://zenbook.home:4040/jobs/job?id\u003d28",
-            "http://zenbook.home:4040/jobs/job?id\u003d29",
-            "http://zenbook.home:4040/jobs/job?id\u003d30",
-            "http://zenbook.home:4040/jobs/job?id\u003d31",
-            "http://zenbook.home:4040/jobs/job?id\u003d32"
+            "http://zenbook.home:4040/jobs/job?id\u003d35",
+            "http://zenbook.home:4040/jobs/job?id\u003d36",
+            "http://zenbook.home:4040/jobs/job?id\u003d37",
+            "http://zenbook.home:4040/jobs/job?id\u003d38",
+            "http://zenbook.home:4040/jobs/job?id\u003d39"
           ],
           "interpreterSettingId": "spark"
         }
@@ -832,15 +996,15 @@
       "jobName": "paragraph_1551994434363_364998018",
       "id": "20190307-223354_1321043687",
       "dateCreated": "2019-03-07 22:33:54.363",
-      "dateStarted": "2019-03-10 15:24:12.718",
-      "dateFinished": "2019-03-10 15:24:38.295",
+      "dateStarted": "2019-03-11 23:26:35.415",
+      "dateFinished": "2019-03-11 23:27:03.460",
       "status": "FINISHED",
       "progressUpdateIntervalMs": 500
     },
     {
       "text": "%md\nMalheureusement, Zeppelin ne permet pas d\u0027ajouter un label aux points. Sinon, on aurait ajouté le code de la compagnie en label sur chaque point afin de pouvoir facilement visualiser ses valeurs moyennes de retard ainsi que son groupe.",
       "user": "anonymous",
-      "dateUpdated": "2019-03-10 15:24:38.334",
+      "dateUpdated": "2019-03-11 23:27:03.518",
       "config": {
         "colWidth": 12.0,
         "fontSize": 9.0,
@@ -873,8 +1037,8 @@
       "jobName": "paragraph_1551995065918_-1807329866",
       "id": "20190307-224425_1546743051",
       "dateCreated": "2019-03-07 22:44:25.918",
-      "dateStarted": "2019-03-10 15:24:38.380",
-      "dateFinished": "2019-03-10 15:24:38.437",
+      "dateStarted": "2019-03-11 23:27:03.611",
+      "dateFinished": "2019-03-11 23:27:03.670",
       "status": "FINISHED",
       "progressUpdateIntervalMs": 500
     },
@@ -882,7 +1046,7 @@
       "title": "Résultat : compagnies les plus et moins sujettes aux retards (en fonction du résultat précédent)",
       "text": "// On récupère le nom complet des compagnies via le fichier complémentaire\nprintln(\"Compagnies les moins sujettes aux retards\")\npredictions\n    .join(df_carriers,predictions(\"UniqueCarrier\")\u003d\u003d\u003ddf_carriers(\"Code\"))\n    .select(\"UniqueCarrier\",\"Description\",\"Prediction\")\n    .filter($\"prediction\" \u003d\u003d\u003d 1) // celon le résultat précédent\n    .show(false) // afficher le nom complet (sans limite de caractères)\n    \nprintln(\"Compagnies les plus sujettes aux retards\")\npredictions\n    .join(df_carriers,predictions(\"UniqueCarrier\")\u003d\u003d\u003ddf_carriers(\"Code\"))\n    .select(\"UniqueCarrier\",\"Description\",\"Prediction\")\n    .filter($\"prediction\" \u003d\u003d\u003d 4) // celon le résultat précédent\n    .show(false) // afficher le nom complet (sans limite de caractères)",
       "user": "anonymous",
-      "dateUpdated": "2019-03-10 15:24:38.477",
+      "dateUpdated": "2019-03-11 23:27:03.704",
       "config": {
         "colWidth": 12.0,
         "fontSize": 9.0,
@@ -918,18 +1082,18 @@
           "tooltip": "View in Spark web UI",
           "group": "spark",
           "values": [
-            "http://zenbook.home:4040/jobs/job?id\u003d33",
-            "http://zenbook.home:4040/jobs/job?id\u003d34",
-            "http://zenbook.home:4040/jobs/job?id\u003d35",
-            "http://zenbook.home:4040/jobs/job?id\u003d36",
-            "http://zenbook.home:4040/jobs/job?id\u003d37",
-            "http://zenbook.home:4040/jobs/job?id\u003d38",
-            "http://zenbook.home:4040/jobs/job?id\u003d39",
             "http://zenbook.home:4040/jobs/job?id\u003d40",
             "http://zenbook.home:4040/jobs/job?id\u003d41",
             "http://zenbook.home:4040/jobs/job?id\u003d42",
             "http://zenbook.home:4040/jobs/job?id\u003d43",
-            "http://zenbook.home:4040/jobs/job?id\u003d44"
+            "http://zenbook.home:4040/jobs/job?id\u003d44",
+            "http://zenbook.home:4040/jobs/job?id\u003d45",
+            "http://zenbook.home:4040/jobs/job?id\u003d46",
+            "http://zenbook.home:4040/jobs/job?id\u003d47",
+            "http://zenbook.home:4040/jobs/job?id\u003d48",
+            "http://zenbook.home:4040/jobs/job?id\u003d49",
+            "http://zenbook.home:4040/jobs/job?id\u003d50",
+            "http://zenbook.home:4040/jobs/job?id\u003d51"
           ],
           "interpreterSettingId": "spark"
         }
@@ -938,16 +1102,16 @@
       "jobName": "paragraph_1551993110828_418834749",
       "id": "20190307-221150_740979220",
       "dateCreated": "2019-03-07 22:11:50.828",
-      "dateStarted": "2019-03-10 15:24:38.562",
-      "dateFinished": "2019-03-10 15:25:33.935",
+      "dateStarted": "2019-03-11 23:27:03.751",
+      "dateFinished": "2019-03-11 23:27:56.814",
       "status": "FINISHED",
       "progressUpdateIntervalMs": 500
     },
     {
       "title": "Q4: Quels sont les 3 aéroports les plus/moins sujets aux retards (départ/arrivé) ?",
-      "text": "val df4 \u003d df.select(col(\"Origin\"),col(\"Dest\"),col(\"ArrDelay\").cast(\"double\"),col(\"DepDelay\").cast(\"double\"))\n    .filter($\"Cancelled\" \u003d!\u003d 1 \u0026\u0026 $\"Diverted\" \u003d!\u003d 1)\n    .na.fill(0,Seq(\"ArrDelay\"))\n    .na.fill(0,Seq(\"DepDelay\"))\n\n// On récupère les retards au départ et à l\u0027arrivée\nval df4o \u003d df4.groupBy(\"Origin\").agg(avg(\"DepDelay\").as(\"DepDelay\"))\nval df4d \u003d df4.groupBy(\"Dest\").agg(avg(\"ArrDelay\").as(\"ArrDelay\"))\n\nval df4g \u003d df4o\n    .join(df4d,df4o(\"Origin\")\u003d\u003d\u003ddf4d(\"Dest\"))\n    .groupBy(\"Origin\")\n    .agg((avg(\"DepDelay\")+avg(\"ArrDelay\")).as(\"TotalDelay\"))\n\n// On utilise le fichier des aéroports pour obtenir le nom des aéroports concernés\nprintln(\"Aéroports les plus sujets aux retards\")\ndf4g\n    .join(df_airports,df4g(\"Origin\")\u003d\u003d\u003ddf_airports(\"iata\"))\n    .select(\"Origin\",\"airport\",\"TotalDelay\")\n    .sort(desc(\"TotalDelay\"))\n    .limit(3)\n    .show(false)\n    \nprintln(\"Aéroports les moins sujets aux retards\")\ndf4g\n    .join(df_airports,df4g(\"Origin\")\u003d\u003d\u003ddf_airports(\"iata\"))\n    .select(\"Origin\",\"airport\",\"TotalDelay\")\n    .sort(asc(\"TotalDelay\"))\n    .limit(3)\n    .show(false)",
+      "text": "val df4 \u003d df.select(col(\"Origin\"),col(\"Dest\"),col(\"ArrDelay\").cast(\"double\"),col(\"DepDelay\").cast(\"double\"))\n    .filter($\"Cancelled\" \u003d!\u003d 1 \u0026\u0026 $\"Diverted\" \u003d!\u003d 1)\n    .na.fill(0,Seq(\"ArrDelay\"))\n    .na.fill(0,Seq(\"DepDelay\"))\n\n// On récupère les retards au départ et à l\u0027arrivée\nval df4o \u003d df4.groupBy(\"Origin\").agg(avg(\"DepDelay\").as(\"DepDelay\"))\nval df4d \u003d df4.groupBy(\"Dest\").agg(avg(\"ArrDelay\").as(\"ArrDelay\"))\n\n// Délais total\n/*val df4g \u003d df4o\n    .join(df4d,df4o(\"Origin\")\u003d\u003d\u003ddf4d(\"Dest\"))\n    .groupBy(\"Origin\")\n    .agg((avg(\"DepDelay\")+avg(\"ArrDelay\")).as(\"TotalDelay\"))*/\n\n// On utilise le fichier des aéroports pour obtenir le nom des aéroports concernés\nprintln(\"Aéroports les plus sujets aux retards de départ\")\ndf4o\n    .join(df_airports,df4o(\"Origin\")\u003d\u003d\u003ddf_airports(\"iata\"))\n    .select(\"Origin\",\"airport\",\"DepDelay\")\n    .sort(desc(\"DepDelay\"))\n    .limit(3)\n    .show(false)\n    \nprintln(\"Aéroports les moins sujets aux retards de départ\")\ndf4o\n    .join(df_airports,df4o(\"Origin\")\u003d\u003d\u003ddf_airports(\"iata\"))\n    .select(\"Origin\",\"airport\",\"DepDelay\")\n    .sort(asc(\"DepDelay\"))\n    .limit(3)\n    .show(false)\n    \nprintln(\"Aéroports les plus sujets aux retards d\u0027arrivée\")\ndf4d\n    .join(df_airports,df4d(\"Dest\")\u003d\u003d\u003ddf_airports(\"iata\"))\n    .select(\"Dest\",\"airport\",\"ArrDelay\")\n    .sort(desc(\"ArrDelay\"))\n    .limit(3)\n    .show(false)\n    \nprintln(\"Aéroports les moins sujets aux retards d\u0027arrivée\u0027\")\ndf4d\n    .join(df_airports,df4d(\"Dest\")\u003d\u003d\u003ddf_airports(\"iata\"))\n    .select(\"Dest\",\"airport\",\"ArrDelay\")\n    .sort(asc(\"ArrDelay\"))\n    .limit(3)\n    .show(false)",
       "user": "anonymous",
-      "dateUpdated": "2019-03-10 15:27:51.239",
+      "dateUpdated": "2019-03-11 23:47:26.774",
       "config": {
         "editorSetting": {
           "language": "scala",
@@ -972,7 +1136,7 @@
         "msg": [
           {
             "type": "TEXT",
-            "data": "Aéroports les plus sujets aux retards\n+------+------------------+------------------+\n|Origin|airport           |TotalDelay        |\n+------+------------------+------------------+\n|ACK   |Nantucket Memorial|63.36926340940924 |\n|SOP   |Moore County      |50.839747846894994|\n|OTH   |North Bend Muni   |48.38306451612903 |\n+------+------------------+------------------+\n\nAéroports les moins sujets aux retards\n+------+------------------+------------------+\n|Origin|airport           |TotalDelay        |\n+------+------------------+------------------+\n|HVN   |Tweed-New Haven   |-6.0              |\n|PIH   |Pocatello Regional|-3.378354139839701|\n|GLH   |Mid Delta Regional|-3.0              |\n+------+------------------+------------------+\n\ndf4: org.apache.spark.sql.DataFrame \u003d [Origin: string, Dest: string ... 2 more fields]\ndf4o: org.apache.spark.sql.DataFrame \u003d [Origin: string, DepDelay: double]\ndf4d: org.apache.spark.sql.DataFrame \u003d [Dest: string, ArrDelay: double]\ndf4g: org.apache.spark.sql.DataFrame \u003d [Origin: string, TotalDelay: double]\n"
+            "data": "Aéroports les plus sujets aux retards de départ\n+------+------------------+------------------+\n|Origin|airport           |DepDelay          |\n+------+------------------+------------------+\n|ACK   |Nantucket Memorial|37.283018867924525|\n|PIR   |Pierre Regional   |32.888888888888886|\n|PUB   |Pueblo Memorial   |27.0              |\n+------+------------------+------------------+\n\nAéroports les moins sujets aux retards de départ\n+------+------------------+------------------+\n|Origin|airport           |DepDelay          |\n+------+------------------+------------------+\n|GLH   |Mid Delta Regional|-5.5              |\n|WYS   |Yellowstone       |-5.137229987293519|\n|PIH   |Pocatello Regional|-4.306110793832096|\n+------+------------------+------------------+\n\nAéroports les plus sujets aux retards d\u0027arrivée\n+----+------------------------+------------------+\n|Dest|airport                 |ArrDelay          |\n+----+------------------------+------------------+\n|MQT |Marquette County Airport|27.525698516729907|\n|OTH |North Bend Muni         |26.79233870967742 |\n|ACK |Nantucket Memorial      |26.086244541484717|\n+----+------------------------+------------------+\n\nAéroports les moins sujets aux retards d\u0027arrivée\u0027\n+----+---------------+--------------------+\n|Dest|airport        |ArrDelay            |\n+----+---------------+--------------------+\n|HVN |Tweed-New Haven|-2.3333333333333335 |\n|ITH |Tompkins Cty   |-1.7560975609756098 |\n|LIH |Lihue          |-0.38210751474978255|\n+----+---------------+--------------------+\n\ndf4: org.apache.spark.sql.DataFrame \u003d [Origin: string, Dest: string ... 2 more fields]\ndf4o: org.apache.spark.sql.DataFrame \u003d [Origin: string, DepDelay: double]\ndf4d: org.apache.spark.sql.DataFrame \u003d [Dest: string, ArrDelay: double]\n"
           }
         ]
       },
@@ -983,10 +1147,14 @@
           "tooltip": "View in Spark web UI",
           "group": "spark",
           "values": [
-            "http://zenbook.home:4040/jobs/job?id\u003d45",
-            "http://zenbook.home:4040/jobs/job?id\u003d46",
-            "http://zenbook.home:4040/jobs/job?id\u003d47",
-            "http://zenbook.home:4040/jobs/job?id\u003d48"
+            "http://zenbook.home:4040/jobs/job?id\u003d74",
+            "http://zenbook.home:4040/jobs/job?id\u003d75",
+            "http://zenbook.home:4040/jobs/job?id\u003d76",
+            "http://zenbook.home:4040/jobs/job?id\u003d77",
+            "http://zenbook.home:4040/jobs/job?id\u003d78",
+            "http://zenbook.home:4040/jobs/job?id\u003d79",
+            "http://zenbook.home:4040/jobs/job?id\u003d80",
+            "http://zenbook.home:4040/jobs/job?id\u003d81"
           ],
           "interpreterSettingId": "spark"
         }
@@ -995,15 +1163,15 @@
       "jobName": "paragraph_1551992625312_219334833",
       "id": "20190307-171527_1042879896",
       "dateCreated": "2019-03-07 22:03:45.312",
-      "dateStarted": "2019-03-10 15:27:51.293",
-      "dateFinished": "2019-03-10 15:29:20.185",
+      "dateStarted": "2019-03-11 23:47:26.859",
+      "dateFinished": "2019-03-11 23:48:59.535",
       "status": "FINISHED",
       "progressUpdateIntervalMs": 500
     },
     {
-      "text": "df4g.join(df_airports,df4g(\"Origin\")\u003d\u003d\u003ddf_airports(\"iata\")).registerTempTable(\"df4g\")",
+      "text": "df4o.join(df_airports,df4o(\"Origin\")\u003d\u003d\u003ddf_airports(\"iata\")).registerTempTable(\"df4o\")",
       "user": "anonymous",
-      "dateUpdated": "2019-03-10 15:29:48.346",
+      "dateUpdated": "2019-03-11 23:51:36.379",
       "config": {
         "colWidth": 12.0,
         "fontSize": 9.0,
@@ -1035,15 +1203,15 @@
       "jobName": "paragraph_1551993431003_-501116033",
       "id": "20190307-221711_1315276632",
       "dateCreated": "2019-03-07 22:17:11.003",
-      "dateStarted": "2019-03-10 15:29:48.459",
-      "dateFinished": "2019-03-10 15:29:48.927",
+      "dateStarted": "2019-03-11 23:51:36.499",
+      "dateFinished": "2019-03-11 23:51:36.701",
       "status": "FINISHED",
       "progressUpdateIntervalMs": 500
     },
     {
-      "text": "%sql select * from df4g order by TotalDelay desc",
+      "text": "%sql select * from df4o order by DepDelay desc",
       "user": "anonymous",
-      "dateUpdated": "2019-03-10 16:03:41.357",
+      "dateUpdated": "2019-03-11 23:53:09.757",
       "config": {
         "colWidth": 12.0,
         "fontSize": 9.0,
@@ -1060,7 +1228,14 @@
                   "tableColumnTypeState": {
                     "names": {
                       "Origin": "string",
-                      "TotalDelay": "string"
+                      "DepDelay": "string",
+                      "iata": "string",
+                      "airport": "string",
+                      "city": "string",
+                      "state": "string",
+                      "country": "string",
+                      "lat": "string",
+                      "long": "string"
                     },
                     "updated": false
                   },
@@ -1091,7 +1266,7 @@
               "groups": [],
               "values": [
                 {
-                  "name": "TotalDelay",
+                  "name": "DepDelay",
                   "index": 1.0,
                   "aggr": "sum"
                 }
@@ -1118,7 +1293,7 @@
         "msg": [
           {
             "type": "TABLE",
-            "data": "Origin\tTotalDelay\tiata\tairport\tcity\tstate\tcountry\tlat\tlong\nACK\t63.36926340940924\tACK\tNantucket Memorial\tNantucket\tMA\tUSA\t41.25305194\t-70.06018139\nSOP\t50.839747846894994\tSOP\tMoore County\tPinehurst/Southern Pines\tNC\tUSA\t35.23735278\t-79.39116944\nOTH\t48.38306451612903\tOTH\tNorth Bend Muni\tNorth Bend\tOR\tUSA\t43.41713889\t-124.2460278\nHHH\t43.53821677173737\tHHH\tHilton Head\tNA\tNA\tUSA\t32.224384\t-80.697629\nPIR\t40.638888888888886\tPIR\tPierre Regional\tPierre\tSD\tUSA\t44.38267694\t-100.285965\nISO\t39.52547553370359\tISO\tKinston Regional Jetport At Stallin\tKinston\tNC\tUSA\t35.32807944\t-77.61552611\nEWR\t38.897518455060776\tEWR\tNewark Intl\tNewark\tNJ\tUSA\t40.69249722\t-74.16866056\nMQT\t37.3906010236937\tMQT\tMarquette County Airport\tNA\tNA\tUSA\t46.353639\t-87.395361\nMCN\t37.25775156051458\tMCN\tMiddle Georgia Regional\tMacon\tGA\tUSA\t32.69284944\t-83.64921083\nCEC\t36.91539483869083\tCEC\tJack McNamara \tCrescent City\tCA\tUSA\t41.78015722\t-124.2365333\nLMT\t35.8909786287914\tLMT\tKlamath Falls International\tKlamath Falls\tOR\tUSA\t42.15614361\t-121.7332081\nSPI\t35.60101017330928\tSPI\tCapital\tSpringfield\tIL\tUSA\t39.84395194\t-89.67761861\nAKN\t34.60205134821313\tAKN\tKing Salmon\tKing Salmon\tAK\tUSA\t58.67680167\t-156.6492175\nEYW\t34.559144436793844\tEYW\tKey West International\tKey West\tFL\tUSA\t24.55611111\t-81.75955556\nFAY\t33.98309151704866\tFAY\tFayetteville Municipal\tFayetteville\tNC\tUSA\t34.99147222\t-78.88\nORD\t33.738428974789535\tORD\tChicago O\u0027Hare International\tChicago\tIL\tUSA\t41.979595\t-87.90446417\nCIC\t33.20209048431289\tCIC\tChico Municipal\tChico\tCA\tUSA\t39.79538278\t-121.8584231\nGNV\t32.406392542333656\tGNV\tGainesville Regional\tGainesville\tFL\tUSA\t29.69005556\t-82.27177778\nAGS\t32.25718105884233\tAGS\tBush \tAugusta\tGA\tUSA\t33.369955\t-81.96449611\nTTN\t30.85796975616815\tTTN\tTrenton-Mercer County \tTrenton\tNJ\tUSA\t40.27669111\t-74.81346833\nDHN\t30.56898330479432\tDHN\tDothan \tDothan\tAL\tUSA\t31.32133917\t-85.44962889\nCAE\t30.168349100937082\tCAE\tColumbia Metropolitan\tColumbia\tSC\tUSA\t33.93884\t-81.11953944\nRDD\t30.05040493547509\tRDD\tRedding Municipal\tRedding\tCA\tUSA\t40.50898361\t-122.2934019\nILG\t29.807191860988567\tILG\tNew Castle County \tWilmington\tDE\tUSA\t39.67872222\t-75.60652778\nJFK\t29.746779522754935\tJFK\tJohn F Kennedy Intl\tNew York\tNY\tUSA\t40.63975111\t-73.77892556\nPFN\t29.515882342243078\tPFN\tPanama City-Bay County International\tPanama City\tFL\tUSA\t30.21208333\t-85.68280556\nAVP\t29.19378632077771\tAVP\tWilkes-Barre/Scranton Intl\tWilkes-Barre/Scranton\tPA\tUSA\t41.33814944\t-75.7242675\nPWM\t28.896620972543122\tPWM\tPortland International Jetport\tPortland\tME\tUSA\t43.64616667\t-70.30875\nVLD\t28.77198175385091\tVLD\tValdosta Regional\tValdosta\tGA\tUSA\t30.7825\t-83.27672222\nLGA\t28.715936157893207\tLGA\tLaGuardia\tNew York\tNY\tUSA\t40.77724306\t-73.87260917\nCMI\t28.597497509618773\tCMI\tUniversity of Illinois-Willard\tChampaign/Urbana\tIL\tUSA\t40.03925\t-88.27805556\nMEI\t28.467952521671382\tMEI\tKey \tMeridian\tMS\tUSA\t32.33313333\t-88.75120556\nEGE\t28.152619205909314\tEGE\tEagle County Regional\tEagle\tCO\tUSA\t39.64256778\t-106.9176953\nBMI\t28.138636739769026\tBMI\tCentral Illinois Regional\tBloomington\tIL\tUSA\t40.47798556\t-88.91595278\nCWA\t28.08763948156973\tCWA\tCentral Wisconsin\tMosinee\tWI\tUSA\t44.77761917\t-89.66677944\nBTV\t27.82185782688328\tBTV\tBurlington International\tBurlington\tVT\tUSA\t44.47300361\t-73.1503125\nACV\t27.7144469660886\tACV\tArcata\tArcata/Eureka\tCA\tUSA\t40.97811528\t-124.1086189\nCSG\t27.59826991442535\tCSG\tColumbus Metropolitan\tColumbus\tGA\tUSA\t32.51633333\t-84.93886111\nACY\t27.32368452392145\tACY\tAtlantic City International\tAtlantic City\tNJ\tUSA\t39.45758333\t-74.57716667\nOAJ\t27.261533249636315\tOAJ\tAlbert J Ellis\tJacksonville\tNC\tUSA\t34.82916444\t-77.61213778\nSBN\t27.156577198174315\tSBN\tSouth Bend Regional\tSouth Bend\tIN\tUSA\t41.70895361\t-86.31847417\nFLO\t27.108648940191998\tFLO\tFlorence Regional\tFlorence\tSC\tUSA\t34.18536111\t-79.72388889\nPHL\t26.982062758431834\tPHL\tPhiladelphia Intl\tPhiladelphia\tPA\tUSA\t39.87195278\t-75.24114083\nADK\t26.883915402622357\tADK\tAdak\tAdak\tAK\tUSA\t51.87796389\t-176.6460306\nBGR\t26.806251201488113\tBGR\tBangor International\tBangor\tME\tUSA\t44.80744444\t-68.82813889\nROA\t26.757317946518405\tROA\tRoanoke Regional/ Woodrum \tRoanoke\tVA\tUSA\t37.32546833\t-79.97542833\nMTH\t26.55696364567332\tMTH\tFlorida Keys Marathon\tMarathon\tFL\tUSA\t24.72614083\t-81.05137806\nROC\t26.439909584212216\tROC\tGreater Rochester Int\u0027l\tRochester\tNY\tUSA\t43.11886611\t-77.67238389\nGST\t26.108190476190476\tGST\tGustavus\tGustavus\tAK\tUSA\t58.42438139\t-135.7073814\nSGF\t26.06738424912803\tSGF\tSpringfield-Branson Regional\tSpringfield\tMO\tUSA\t37.24432611\t-93.38685806\nABY\t25.747002805896436\tABY\tSouthwest Georgia Regional\tAlbany\tGA\tUSA\t31.535515\t-84.19447333\nBQK\t25.54958627490035\tBQK\tGlynco Jetport\tBrunswick\tGA\tUSA\t31.25902778\t-81.46630556\nGTR\t25.059857286076547\tGTR\tGolden Triangle Regional\tColumbus-Starkville-West Point\tMS\tUSA\t33.45033444\t-88.59136861\nSFO\t25.00129632652838\tSFO\tSan Francisco International\tSan Francisco\tCA\tUSA\t37.61900194\t-122.3748433\nAPF\t24.984713724499308\tAPF\tNaples Municipal\tNaples\tFL\tUSA\t26.15247222\t-81.77544444\nMIA\t24.947422138959304\tMIA\tMiami International\tMiami\tFL\tUSA\t25.79325\t-80.29055556\nAVL\t24.603619510873532\tAVL\tAsheville Regional\tAsheville\tNC\tUSA\t35.43619444\t-82.54180556\nXNA\t24.503170965332448\tXNA\tNorthwest Arkansas Regional\tFayetteville/Springdale/Rogers\tAR\tUSA\t36.28186944\t-94.30681111\nVPS\t24.443611854739384\tVPS\tEglin Air Force Base\tValparaiso\tFL\tUSA\t30.48325\t-86.5254\nTVC\t24.370419206516864\tTVC\tCherry Capital\tTraverse City\tMI\tUSA\t44.74144472\t-85.582235\nPSG\t24.311902618382526\tPSG\tJames C. Johnson Petersburg\tPetersburg\tAK\tUSA\t56.80165194\t-132.9452781\nSYR\t24.301711755565982\tSYR\tSyracuse-Hancock Intl\tSyracuse\tNY\tUSA\t43.11118694\t-76.10631056\nMOD\t24.156821468505676\tMOD\tModesto City-County-Harry Sham \tModesto\tCA\tUSA\t37.62581722\t-120.9544214\nRIC\t24.029187904914068\tRIC\tRichmond International\tRichmond\tVA\tUSA\t37.50516667\t-77.31966667\nMDT\t23.915157048056546\tMDT\tHarrisburg Intl\tHarrisburg\tPA\tUSA\t40.19349528\t-76.76340361\nFWA\t23.76993260120135\tFWA\tFort Wayne International\tFort Wayne\tIN\tUSA\t40.97846583\t-85.19514639\nLNK\t23.66777477496737\tLNK\tLincoln Municipal\tLincoln\tNE\tUSA\t40.85097222\t-96.75925\nATW\t23.646113402280527\tATW\tOutagamie County Regional\tAppleton\tWI\tUSA\t44.25740806\t-88.51947556\nLIT\t23.592157414312524\tLIT\tAdams \tLittle Rock\tAR\tUSA\t34.72939611\t-92.22424556\nATL\t23.56324733883971\tATL\tWilliam B Hartsfield-Atlanta Intl\tAtlanta\tGA\tUSA\t33.64044444\t-84.42694444\nGSO\t23.485615058137295\tGSO\tPiedmont Triad International\tGreensboro\tNC\tUSA\t36.09774694\t-79.9372975\nHPN\t23.483862805535274\tHPN\tWestchester Cty\tWhite Plains\tNY\tUSA\t41.06695778\t-73.70757444\nBTR\t23.478748905561766\tBTR\tBaton Rouge Metropolitan, Ryan \tBaton Rouge\tLA\tUSA\t30.53316083\t-91.14963444\nIAD\t23.286234978288554\tIAD\tWashington Dulles International\tChantilly\tVA\tUSA\t38.94453194\t-77.45580972\nBUF\t23.135466255016386\tBUF\tBuffalo Niagara Intl\tBuffalo\tNY\tUSA\t42.94052472\t-78.73216667\nDLG\t23.129554655870447\tDLG\tDillingham\tDillingham\tAK\tUSA\t59.0454125\t-158.5033389\nMLU\t23.103197494097067\tMLU\tMonroe Regional\tMonroe\tLA\tUSA\t32.51086556\t-92.03768778\nMBS\t22.820959249254496\tMBS\tMbs International\tSaginaw\tMI\tUSA\t43.53291472\t-84.07964722\nASE\t22.725280780070428\tASE\tAspen-Pitkin Co/Sardy \tAspen\tCO\tUSA\t39.22316\t-106.868845\nBRW\t22.320831841508532\tBRW\tWiley Post Will Rogers Memorial\tBarrow\tAK\tUSA\t71.2854475\t-156.7660019\nILM\t22.317536455929876\tILM\tWilmington International\tWilmington\tNC\tUSA\t34.27061111\t-77.90255556\nSJU\t22.3128899101474\tSJU\tLuis Munoz Marin International\tSan Juan\tPR\tUSA\t18.43941667\t-66.00183333\nMSN\t22.28591584139791\tMSN\tDane County Regional\tMadison\tWI\tUSA\t43.13985778\t-89.33751361\nMLB\t22.225334783823925\tMLB\tMelbourne International \tMelbourne\tFL\tUSA\t28.10275\t-80.64580556\nSAV\t22.193575362647977\tSAV\tSavannah International\tSavannah\tGA\tUSA\t32.12758333\t-81.20213889\nORF\t22.16303819758234\tORF\tNorfolk International\tNorfolk\tVA\tUSA\t36.89461111\t-76.20122222\nMGM\t22.155576059750302\tMGM\tMontgomery Regional Apt\tMontgomery\tAL\tUSA\t32.30064417\t-86.39397611\nGRB\t22.067010970366262\tGRB\tAustin Straubel International\tGreen Bay\tWI\tUSA\t44.48507333\t-88.12959\nPIA\t22.04295502591578\tPIA\tGreater Peoria Regional\tPeoria\tIL\tUSA\t40.66424333\t-89.69330556\nMLI\t22.022969284123675\tMLI\tQuad City\tMoline\tIL\tUSA\t41.44852639\t-90.50753917\nCRW\t21.980360158029768\tCRW\tYeager\tCharleston\tWV\tUSA\t38.37315083\t-81.59318972\nMYR\t21.956500540199464\tMYR\tMyrtle Beach International\tMyrtle Beach\tSC\tUSA\t33.67975\t-78.92833333\nDAB\t21.83477030651546\tDAB\tDaytona Beach International\tDaytona Beach\tFL\tUSA\t29.17991667\t-81.05805556\nCMX\t21.811201445347788\tCMX\tHoughton County Memorial\tHancock\tMI\tUSA\t47.16841722\t-88.48906083\nCMH\t21.75678140567274\tCMH\tPort Columbus Intl\tColumbus\tOH\tUSA\t39.99798528\t-82.89188278\nEWN\t21.74857741280797\tEWN\tCraven County Regional\tNew Bern\tNC\tUSA\t35.07297222\t-77.04294444\nFSD\t21.656191703436864\tFSD\tJoe Foss \tSioux Falls\tSD\tUSA\t43.58135111\t-96.74170028\nCHS\t21.63819511113609\tCHS\tCharleston AFB/International\tCharleston\tSC\tUSA\t32.89864639\t-80.04050583\nTRI\t21.569046402132976\tTRI\tTri-Cities Regional\tBristol\tTN\tUSA\t36.47521417\t-82.40742056\nJAC\t21.530515200486846\tJAC\tJackson Hole\tJackson\tWY\tUSA\t43.60732417\t-110.7377389\nLWB\t21.473028980303972\tLWB\tGreenbrier Valley\tLewisburg\tWV\tUSA\t37.85830556\t-80.39947222\nBOS\t21.41746909176677\tBOS\tGen Edw L Logan Intl\tBoston\tMA\tUSA\t42.3643475\t-71.00517917\nCID\t21.263454394116593\tCID\tEastern Iowa \tCedar Rapids\tIA\tUSA\t41.88458833\t-91.71087222\nGSP\t21.21117882323246\tGSP\tGreenville-Spartanburg\tGreer\tSC\tUSA\t34.89566722\t-82.21885833\nDSM\t21.20473036890821\tDSM\tDes Moines International\tDes Moines\tIA\tUSA\t41.53493306\t-93.66068222\nSWF\t21.154841796321808\tSWF\tStewart\tNewburgh\tNY\tUSA\t41.50409361\t-74.10483833\nDFW\t20.98193287456471\tDFW\tDallas-Fort Worth International\tDallas-Fort Worth\tTX\tUSA\t32.89595056\t-97.0372\nRDU\t20.88309448505369\tRDU\tRaleigh-Durham International\tRaleigh\tNC\tUSA\t35.87763889\t-78.78747222\nALB\t20.87049161611916\tALB\tAlbany Cty\tAlbany\tNY\tUSA\t42.74811944\t-73.80297861\nICT\t20.809967258318114\tICT\tWichita Mid-Continent\tWichita\tKS\tUSA\t37.64995889\t-97.43304583\nLAN\t20.738672668931333\tLAN\tCapital City\tLansing\tMI\tUSA\t42.7787\t-84.58735806\nMKE\t20.688235443814953\tMKE\tGeneral Mitchell International\tMilwaukee\tWI\tUSA\t42.94722222\t-87.89658333\nJNU\t20.55477703286512\tJNU\tJuneau International\tJuneau\tAK\tUSA\t58.35496194\t-134.5762764\nLEX\t20.242323547850006\tLEX\tBlue Grass \tLexington\tKY\tUSA\t38.03697222\t-84.60538889\nRST\t20.1846357268074\tRST\tRochester International\tRochester\tMN\tUSA\t43.90882639\t-92.49798722\nCAK\t20.163114199533474\tCAK\tAkron-Canton Regional\tAkron\tOH\tUSA\t40.91631194\t-81.44246556\nCHA\t20.13195556405793\tCHA\tLovell \tChattanooga\tTN\tUSA\t35.03526833\t-85.20378778\nPHF\t20.12998717555145\tPHF\tNewport News/Williamsburg International\tNewport News\tVA\tUSA\t37.13189556\t-76.4929875\nSHV\t20.122581791280666\tSHV\tShreveport Regional\tShreveport\tLA\tUSA\t32.4466275\t-93.82559833\nPIT\t20.096293511962585\tPIT\tPittsburgh International\tPittsburgh\tPA\tUSA\t40.49146583\t-80.23287083\nSDF\t20.077450234838672\tSDF\tLouisville International-Standiford \tLouisville\tKY\tUSA\t38.17438889\t-85.736\nMKC\t20.0\tMKC\tDowntown\tKansas City\tMO\tUSA\t39.12324111\t-94.592735\nLYH\t19.901076451456696\tLYH\tLynchburg Municipal-Preston Glenn \tLynchburg\tVA\tUSA\t37.32668528\t-79.20043056\nOMA\t19.889057425400914\tOMA\tEppley Airfield\tOmaha\tNE\tUSA\t41.30251861\t-95.89417306\nAEX\t19.841095751135047\tAEX\tAlexandria International\tAlexandria\tLA\tUSA\t31.32737167\t-92.54855611\nMHT\t19.726781092145576\tMHT\tManchester\tManchester\tNH\tUSA\t42.93451639\t-71.43705583\nTUL\t19.599060951868005\tTUL\tTulsa International\tTulsa\tOK\tUSA\t36.19837222\t-95.88824167\nDBQ\t19.54833659033426\tDBQ\tDubuque Municipal\tDubuque\tIA\tUSA\t42.40295944\t-90.70916722\nMDW\t19.53515373314506\tMDW\tChicago Midway\tChicago\tIL\tUSA\t41.7859825\t-87.75242444\nTYS\t19.515210096799024\tTYS\tMcGhee-Tyson\tKnoxville\tTN\tUSA\t35.81248722\t-83.99285583\nTUP\t19.441750373555333\tTUP\tTupelo Municipal \tTupelo\tMS\tUSA\t34.26810833\t-88.769895\nABI\t19.382540264589718\tABI\tAbilene Regional\tAbilene\tTX\tUSA\t32.41132\t-99.68189722\nMFR\t19.36581860849264\tMFR\tRogue Valley International\tMedford\tOR\tUSA\t42.37422778\t-122.8734978\nSTX\t19.30561732970925\tSTX\tHenry E. Rohlsen \tChristiansted\tVI\tUSA\t17.70188889\t-64.79855556\nLBB\t19.243934167206447\tLBB\tLubbock International\tLubbock\tTX\tUSA\t33.66363889\t-101.8227778\nABE\t19.204839913992274\tABE\tLehigh Valley International\tAllentown\tPA\tUSA\t40.65236278\t-75.44040167\nLSE\t19.156505792492908\tLSE\tLa Crosse Municipal\tLa Crosse\tWI\tUSA\t43.87937972\t-91.25653778\nOKC\t18.965316300939477\tOKC\tWill Rogers World\tOklahoma City\tOK\tUSA\t35.39308833\t-97.60073389\nHOU\t18.841630198181786\tHOU\tWilliam P Hobby\tHouston\tTX\tUSA\t29.64541861\t-95.27888889\nPVD\t18.81634808856072\tPVD\tTheodore F Green State\tProvidence\tRI\tUSA\t41.72399917\t-71.42822111\nCLT\t18.8154529915751\tCLT\tCharlotte/Douglas International\tCharlotte\tNC\tUSA\t35.21401111\t-80.94312583\nTEX\t18.71978901363876\tTEX\tTelluride Regional\tTelluride\tCO\tUSA\t37.95375861\t-107.90848\nPBI\t18.69187795212079\tPBI\tPalm Beach International\tWest Palm Beach\tFL\tUSA\t26.68316194\t-80.09559417\nSEA\t18.688801234990862\tSEA\tSeattle-Tacoma Intl\tSeattle\tWA\tUSA\t47.44898194\t-122.3093131\nPNS\t18.67411108361419\tPNS\tPensacola Regional\tPensacola\tFL\tUSA\t30.47330556\t-87.18744444\nBNA\t18.667497437710338\tBNA\tNashville International\tNashville\tTN\tUSA\t36.12447667\t-86.67818222\nALO\t18.56821829855538\tALO\tWaterloo Municipal\tWaterloo\tIA\tUSA\t42.55708139\t-92.40034361\nGRR\t18.555997547139466\tGRR\tKent County International\tGrand Rapids\tMI\tUSA\t42.88081972\t-85.52276778\nANC\t18.54352199432165\tANC\tTed Stevens Anchorage International\tAnchorage\tAK\tUSA\t61.17432028\t-149.9961856\nWRG\t18.512376179829012\tWRG\tWrangell\tWrangell\tAK\tUSA\t56.48432583\t-132.3698242\nHDN\t18.429987462709725\tHDN\tYampa Valley\tHayden\tCO\tUSA\t40.48118028\t-107.2176597\nMOB\t18.428024334965958\tMOB\tMobile Regional\tMobile\tAL\tUSA\t30.69141667\t-88.24283333\nMAF\t18.412272174785095\tMAF\tMidland International\tMidland\tTX\tUSA\t31.94252778\t-102.2019139\nLFT\t18.374693006986703\tLFT\tLafayette Regional\tLafayette\tLA\tUSA\t30.20527972\t-91.987655\nKTN\t18.344847723682776\tKTN\tKetchikan International\tKetchikan\tAK\tUSA\t55.35556861\t-131.71374\nTOL\t18.32570645070101\tTOL\tToledo Express\tToledo\tOH\tUSA\t41.58680556\t-83.80783333\nBQN\t18.319170589551057\tBQN\tRafael Hernandez\tAguadilla\tPR\tUSA\t18.49486111\t-67.12944444\nFLL\t18.27608233004903\tFLL\tFort Lauderdale-Hollywood Int\u0027l\tFt. Lauderdale\tFL\tUSA\t26.07258333\t-80.15275\nGRK\t18.20181826023234\tGRK\tRobert Gray AAF\tKilleen\tTX\tUSA\t31.06489778\t-97.82779778\nJAN\t18.15782211043539\tJAN\tJackson International\tJackson\tMS\tUSA\t32.31116667\t-90.07588889\nLAS\t18.11525881709909\tLAS\tMcCarran International\tLas Vegas\tNV\tUSA\t36.08036111\t-115.1523333\nFNT\t18.076842865948013\tFNT\tBishop\tFlint\tMI\tUSA\t42.96550333\t-83.74345639\nGPT\t18.04444538343519\tGPT\tGulfport-Biloxi Regional\tGulfport-Biloxi\tMS\tUSA\t30.40728028\t-89.07009278\nHRL\t17.965875854245343\tHRL\tValley International\tHarlingen\tTX\tUSA\t26.22850611\t-97.65439389\nROW\t17.900673381377423\tROW\tRoswell Industrial Air Center\tRoswell\tNM\tUSA\t33.30155556\t-104.5305556\nEVV\t17.82287025500678\tEVV\tEvansville Regional\tEvansville\tIN\tUSA\t38.03799139\t-87.53062667\nIAH\t17.81818182990334\tIAH\tGeorge Bush Intercontinental\tHouston\tTX\tUSA\t29.98047222\t-95.33972222\nDTW\t17.788853369733268\tDTW\tDetroit Metropolitan-Wayne County\tDetroit\tMI\tUSA\t42.21205889\t-83.34883583\nHSV\t17.67538841254566\tHSV\tHuntsville International \tHuntsville\tAL\tUSA\t34.6404475\t-86.77310944\nSTT\t17.668190869442732\tSTT\tCyril E. King\tCharlotte Amalie\tVI\tUSA\t18.33730556\t-64.97336111\nOTZ\t17.66091829768653\tOTZ\tRalph Wien Memorial\tKotzebue\tAK\tUSA\t66.88467694\t-162.5985497\nDEN\t17.59690764497092\tDEN\tDenver Intl\tDenver\tCO\tUSA\t39.85840806\t-104.6670019\nDAL\t17.589455724189623\tDAL\tDallas Love \tDallas\tTX\tUSA\t32.84711389\t-96.85177222\nBHM\t17.585319018971212\tBHM\tBirmingham International\tBirmingham\tAL\tUSA\t33.56294306\t-86.75354972\nFAR\t17.55667427312968\tFAR\tHector International\tFargo\tND\tUSA\t46.91934889\t-96.81498889\nJAX\t17.533729783392094\tJAX\tJacksonville International\tJacksonville\tFL\tUSA\t30.49405556\t-81.68786111\nDAY\t17.411241577073547\tDAY\tJames M Cox Dayton Intl\tDayton\tOH\tUSA\t39.90237583\t-84.219375\nCRP\t17.39789105679923\tCRP\tCorpus Christi International\tCorpus Christi\tTX\tUSA\t27.77036083\t-97.50121528\nTLH\t17.337186642342658\tTLH\tTallahassee Regional\tTallahassee\tFL\tUSA\t30.39652778\t-84.35033333\nMCI\t17.26627710136726\tMCI\tKansas City International\tKansas City\tMO\tUSA\t39.29760528\t-94.71390556\nAMA\t17.22552455545941\tAMA\tAmarillo International\tAmarillo\tTX\tUSA\t35.2193725\t-101.7059272\nSIT\t17.185145371470497\tSIT\tSitka\tSitka\tAK\tUSA\t57.04713806\t-135.3615983\nSTL\t17.148953192697956\tSTL\tLambert-St Louis International\tSt Louis\tMO\tUSA\t38.74768694\t-90.35998972\nBDL\t17.069410151110713\tBDL\tBradley International\tWindsor Locks\tCT\tUSA\t41.93887417\t-72.68322833\nBWI\t17.040968967493995\tBWI\tBaltimore-Washington International\tBaltimore\tMD\tUSA\t39.17540167\t-76.66819833\nCOS\t16.99834282047731\tCOS\tCity of Colorado Springs Muni\tColorado Springs\tCO\tUSA\t38.80580556\t-104.70025\nFSM\t16.922244900853833\tFSM\tFort Smith Regional\tFort Smith\tAR\tUSA\t35.33659028\t-94.36744111\nCHO\t16.83401566183023\tCHO\tCharlottesville-Albermarle\tCharlottesville\tVA\tUSA\t38.13863889\t-78.45286111\nAZO\t16.78385935336541\tAZO\tKalamazoo County\tKalamazoo\tMI\tUSA\t42.234875\t-85.5520575\nCLE\t16.689625728590933\tCLE\tCleveland-Hopkins Intl\tCleveland\tOH\tUSA\t41.41089417\t-81.84939667\nIND\t16.373685259971783\tIND\tIndianapolis International\tIndianapolis\tIN\tUSA\t39.71732917\t-86.29438417\nMSP\t16.35438598757496\tMSP\tMinneapolis-St Paul Intl\tMinneapolis\tMN\tUSA\t44.88054694\t-93.2169225\nGUC\t16.316940890429205\tGUC\tGunnison County\tGunnison\tCO\tUSA\t38.53396333\t-106.9331817\nMCO\t16.23335186127255\tMCO\tOrlando International\tOrlando\tFL\tUSA\t28.42888889\t-81.31602778\nMSY\t16.175059128012464\tMSY\tNew Orleans International \tNew Orleans\tLA\tUSA\t29.99338889\t-90.25802778\nRSW\t16.153107229094733\tRSW\tSouthwest Florida International\tFt. Myers\tFL\tUSA\t26.53616667\t-81.75516667\nMFE\t16.099411261930726\tMFE\tMcAllen Miller International\tMcAllen\tTX\tUSA\t26.17583333\t-98.23861111\nAUS\t16.037183696449397\tAUS\tAustin-Bergstrom International\tAustin\tTX\tUSA\t30.19453278\t-97.66987194\nPMD\t16.022392837005413\tPMD\tPalmdale Production Flight\tPalmdale\tCA\tUSA\t34.62938889\t-118.0845528\nSAT\t15.809056588149645\tSAT\tSan Antonio International\tSan Antonio\tTX\tUSA\t29.53369444\t-98.46977778\nLRD\t15.712310900502274\tLRD\tLaredo International\tLaredo\tTX\tUSA\t27.54373861\t-99.46154361\nMEM\t15.711825947104089\tMEM\tMemphis International\tMemphis\tTN\tUSA\t35.04241667\t-89.97666667\nTXK\t15.638293726263758\tTXK\tTexarkana Regional-Webb \tTexarkana\tAR\tUSA\t33.45370806\t-93.99102\nLAX\t15.607592997889466\tLAX\tLos Angeles International\tLos Angeles\tCA\tUSA\t33.94253611\t-118.4080744\nOME\t15.544525476717709\tOME\tNome\tNome\tAK\tUSA\t64.51220222\t-165.4452458\nSCC\t15.528691912075786\tSCC\tDeadhorse\tDeadhorse\tAK\tUSA\t70.19475583\t-148.4651608\nTPA\t15.518990698364096\tTPA\tTampa International \tTampa\tFL\tUSA\t27.97547222\t-82.53325\nHKY\t15.434684684684687\tHKY\tHickory Municipal\tHickory\tNC\tUSA\t35.74114639\t-81.38954889\nSRQ\t15.414340589624484\tSRQ\tSarasota Bradenton International\tSarasota\tFL\tUSA\t27.39533333\t-82.55411111\nCDV\t15.30888745469272\tCDV\tMerle K (Mudhole) Smith\tCordova\tAK\tUSA\t60.49183389\t-145.4776503\nGGG\t15.26944136951817\tGGG\tGregg County\tLongview\tTX\tUSA\t32.38486111\t-94.71171\nSMF\t15.220972015084758\tSMF\tSacramento International\tSacramento\tCA\tUSA\t38.69542167\t-121.5907669\nGCC\t15.20798766943198\tGCC\tGillette-Campbell County\tGillette\tWY\tUSA\t44.34889806\t-105.5393614\nDCA\t15.076271875316788\tDCA\tRonald Reagan Washington National\tArlington\tVA\tUSA\t38.85208333\t-77.03772222\nRNO\t15.031026702539137\tRNO\tReno/Tahoe International\tReno\tNV\tUSA\t39.49857611\t-119.7680647\nBET\t15.024791386041915\tBET\tBethel\tBethel\tAK\tUSA\t60.77977639\t-161.8379975\nPSP\t14.92182726114019\tPSP\tPalm Springs International\tPalm Springs\tCA\tUSA\t33.82921556\t-116.5062531\nBGM\t14.787890445691119\tBGM\tBinghamton Regional\tBinghamton\tNY\tUSA\t42.20848278\t-75.97961361\nBRO\t14.457796477071236\tBRO\tBrownsville/S.Padre Island International\tBrownsville\tTX\tUSA\t25.90683333\t-97.42586111\nPHX\t14.377442740997921\tPHX\tPhoenix Sky Harbor International\tPhoenix\tAZ\tUSA\t33.43416667\t-112.0080556\nSJT\t14.374800523912974\tSJT\tSan Angelo Regional /Mathis \tSan Angelo\tTX\tUSA\t31.35775\t-100.4963056\nCLL\t14.235922804617108\tCLL\tEasterwood \tCollege Station\tTX\tUSA\t30.58858944\t-96.36382417\nPDX\t14.21689070109349\tPDX\tPortland Intl\tPortland\tOR\tUSA\t45.58872222\t-122.5975\nMTJ\t14.197290266916049\tMTJ\tMontrose Regional\tMontrose\tCO\tUSA\t38.50886722\t-107.8938333\nELP\t14.177670697862094\tELP\tEl Paso International\tEl Paso\tTX\tUSA\t31.80666667\t-106.3778056\nABQ\t14.175525776600022\tABQ\tAlbuquerque International\tAlbuquerque\tNM\tUSA\t35.04022222\t-106.6091944\nSLE\t14.086154448859295\tSLE\tMcNary Fld\tSalem\tOR\tUSA\t44.90952778\t-123.0025\nBZN\t14.034058273191043\tBZN\tGallatin \tBozeman\tMT\tUSA\t45.77690139\t-111.1530072\nTYR\t13.842915866270747\tTYR\tTyler Pounds \tTyler\tTX\tUSA\t32.35413889\t-95.40238611\nBUR\t13.81208829471256\tBUR\tBurbank-Glendale-Pasadena\tBurbank\tCA\tUSA\t34.20061917\t-118.3584969\nSUX\t13.800905502670071\tSUX\tSioux Gateway \tSioux City\tIA\tUSA\t42.40260333\t-96.38436694\nEUG\t13.791883614548832\tEUG\tMahlon Sweet \tEugene\tOR\tUSA\t44.12326\t-123.2186856\nBOI\t13.761986114331524\tBOI\tBoise Air Terminal\tBoise\tID\tUSA\t43.56444444\t-116.2227778\nISP\t13.672580569417025\tISP\tLong Island - MacArthur\tIslip\tNY\tUSA\t40.7952425\t-73.10021194\nOAK\t13.671837638276985\tOAK\tMetropolitan Oakland International\tOakland\tCA\tUSA\t37.72129083\t-122.2207167\nLCH\t13.609684567569058\tLCH\tLake Charles Regional\tLake Charles\tLA\tUSA\t30.1260975\t-93.22340361\nYKM\t13.458333333333334\tYKM\tYakima Air Terminal\tYakima\tWA\tUSA\t46.56816972\t-120.5440594\nSAN\t13.440900592947834\tSAN\tSan Diego International-Lindbergh \tSan Diego\tCA\tUSA\t32.73355611\t-117.1896567\nFAT\t13.336046830298821\tFAT\tFresno Yosemite International\tFresno\tCA\tUSA\t36.77619444\t-119.7181389\nTUS\t13.274173028196586\tTUS\tTucson International\tTucson\tAZ\tUSA\t32.11608333\t-110.9410278\nCVG\t13.169909603838377\tCVG\tCincinnati Northern Kentucky Intl\tCovington\tKY\tUSA\t39.04614278\t-84.6621725\nGFK\t13.091908965752365\tGFK\tGrand Forks International\tGrand Forks\tND\tUSA\t47.949255\t-97.17611111\nONT\t13.048087378634051\tONT\tOntario International\tOntario\tCA\tUSA\t34.056\t-117.6011944\nFAI\t13.010962941501912\tFAI\tFairbanks International\tFairbanks\tAK\tUSA\t64.8136775\t-147.8596694\nBIS\t12.891358424563471\tBIS\tBismarck Municipal\tBismarck\tND\tUSA\t46.77411111\t-100.7467222\nGEG\t12.775470299975243\tGEG\tSpokane Intl\tSpokane\tWA\tUSA\t47.61985556\t-117.5338425\nYUM\t12.723804458682475\tYUM\tYuma MCAS-Yuma International\tYuma\tAZ\tUSA\t32.65658333\t-114.6059722\nINL\t12.646151266141203\tINL\tFalls International\tInternational Falls\tMN\tUSA\t48.56618722\t-93.40306667\nERI\t12.542965315675668\tERI\tErie Intl\tErie\tPA\tUSA\t42.08202139\t-80.17621556\nMRY\t12.537897075398135\tMRY\tMonterey Peninsula\tMonterey\tCA\tUSA\t36.5869825\t-121.8429478\nSBP\t12.35197049824821\tSBP\tSan Luis Obispo Co-McChesney \tSan Luis Obispo\tCA\tUSA\t35.23705806\t-120.6423931\nYAK\t12.117050977242547\tYAK\tYakutat\tYakutat\tAK\tUSA\t59.50336056\t-139.6602261\nSJC\t12.064801449960111\tSJC\tSan Jose International\tSan Jose\tCA\tUSA\t37.36186194\t-121.9290089\nBPT\t12.05799468842947\tBPT\tSoutheast Texas Regional\tBeaumont/Port Arthur\tTX\tUSA\t29.95083333\t-94.02069444\nLAW\t11.915393071210651\tLAW\tLawton-Ft Sill Regional\tLawton\tOK\tUSA\t34.56771444\t-98.41663667\nRAP\t11.804524170624205\tRAP\tRapid City Regional\tRapid City\tSD\tUSA\t44.04532139\t-103.0573708\nGJT\t11.601114390395944\tGJT\tWalker \tGrand Junction\tCO\tUSA\t39.1224125\t-108.5267347\nDLH\t11.467929276845727\tDLH\tDuluth International\tDuluth\tMN\tUSA\t46.84209028\t-92.19364861\nRDM\t11.329447320669258\tRDM\tRoberts \tRedmond\tOR\tUSA\t44.25406722\t-121.1499633\nELM\t11.291984512251503\tELM\tElmira/Corning Regional\tElmira\tNY\tUSA\t42.15991361\t-76.89144333\nPLN\t11.193192231147002\tPLN\tPellston Regional  of Emmet County\tPellston\tMI\tUSA\t45.5709275\t-84.796715\nSPS\t11.151412565669562\tSPS\tSheppard AFB/Wichita Falls Municipal\tWichita Falls\tTX\tUSA\t33.98879611\t-98.49189333\nSNA\t11.126638018211086\tSNA\tJohn Wayne /Orange Co\tSanta Ana\tCA\tUSA\t33.67565861\t-117.8682225\nRFD\t11.088678653042887\tRFD\tGreater Rockford\tRockford\tIL\tUSA\t42.19536389\t-89.09721111\nSBA\t10.956238847327752\tSBA\tSanta Barbara Municipal\tSanta Barbara\tCA\tUSA\t34.42621194\t-119.8403733\nSCE\t10.92411498190072\tSCE\tUniversity Park\tNA\tNA\tUSA\t40.851206\t-77.846302\nMOT\t10.750033637909313\tMOT\tMinot International\tMinot\tND\tUSA\t48.25937778\t-101.2803339\nIPL\t10.597556640848303\tIPL\tImperial County\tImperial\tCA\tUSA\t32.83422028\t-115.5787456\nLGB\t10.452242999166362\tLGB\tLong Beach (Daugherty )\tLong Beach\tCA\tUSA\t33.81772222\t-118.1516111\nACT\t10.365964035526098\tACT\tWaco Regional\tWaco\tTX\tUSA\t31.61128833\t-97.23051917\nBFL\t10.357857548434062\tBFL\tMeadows \tBakersfield\tCA\tUSA\t35.43359806\t-119.0567681\nADQ\t10.295296865688737\tADQ\tKodiak \tKodiak\tAK\tUSA\t57.74996778\t-152.4938553\nBIL\t9.997669395171174\tBIL\tBillings Logan Intl\tBillings\tMT\tUSA\t45.8076625\t-108.5428611\nSLC\t9.905425728772126\tSLC\tSalt Lake City Intl\tSalt Lake City\tUT\tUSA\t40.78838778\t-111.9777731\nRHI\t9.644451070427575\tRHI\tRhinelander-Oneida County\tRhinelander\tWI\tUSA\t45.63119306\t-89.46745361\nDRO\t9.508456524422204\tDRO\tDurango-La Plata County\tDurango\tCO\tUSA\t37.15151667\t-107.7537692\nMSO\t9.460293096647987\tMSO\tMissoula International\tMissoula\tMT\tUSA\t46.91630556\t-114.0905556\nFLG\t9.431626987245927\tFLG\tFlagstaff Pulliam\tFlagstaff\tAZ\tUSA\t35.13845472\t-111.6712183\nPSE\t9.048452707206874\tPSE\tMercedita\tPonce\tPR\tUSA\t18.00830278\t-66.56301194\nPSC\t8.175606919095914\tPSC\tTri-Cities\tPasco\tWA\tUSA\t46.26468028\t-119.1190292\nBJI\t8.172175446580955\tBJI\tBemidji-Beltrami County\tBemidji\tMN\tUSA\t47.50942417\t-94.93372333\nCLD\t7.857160249204348\tCLD\tMC Clellan-Palomar Airport\tNA\tNA\tUSA\t33.127231\t-117.278727\nMKG\t7.415384615384616\tMKG\tMuskegon County\tMuskegon\tMI\tUSA\t43.16948806\t-86.23822306\nEAU\t7.406060606060606\tEAU\tChippewa Valley Regional\tEau Claire\tWI\tUSA\t44.86525722\t-91.48507194\nITH\t7.010569105691058\tITH\tTompkins Cty \tIthaca\tNY\tUSA\t42.49102778\t-76.45844444\nRKS\t6.845198845593455\tRKS\tRock Springs-Sweetwater County\tRock Springs\tWY\tUSA\t41.5942175\t-109.0651928\nFCA\t6.834385967825854\tFCA\tGlacier Park Intl\tKalispell\tMT\tUSA\t48.31140472\t-114.2550694\nCPR\t6.473260447325027\tCPR\tNatrona County Intl\tCasper\tWY\tUSA\t42.90835556\t-106.4644661\nSMX\t5.617247218968564\tSMX\tSanta Maria Pub/Capt G Allan Hancock \tSanta Maria\tCA\tUSA\t34.89924833\t-120.4575825\nGTF\t5.264023435159027\tGTF\tGreat Falls Intl\tGreat Falls\tMT\tUSA\t47.48200194\t-111.3706853\nLWS\t5.035223535223535\tLWS\tLewiston-Nez Perce County\tLewiston\tID\tUSA\t46.37449806\t-117.0153944\nIDA\t4.623329941821835\tIDA\tIdaho Falls Regional\tIdaho Falls\tID\tUSA\t43.51455556\t-112.0701667\nHLN\t4.498610692786459\tHLN\tHelena Regional\tHelena\tMT\tUSA\t46.60681806\t-111.9827503\nBLI\t4.481418220152391\tBLI\tBellingham Intl\tBellingham\tWA\tUSA\t48.79275\t-122.5375278\nSGU\t4.065045504600818\tSGU\tSt George Muni\tSt George\tUT\tUSA\t37.09058333\t-113.5930556\nOXR\t3.5570628739504944\tOXR\tOxnard\tOxnard\tCA\tUSA\t34.20080083\t-119.2072164\nHNL\t3.091277579732299\tHNL\tHonolulu International\tHonolulu\tHI\tUSA\t21.31869111\t-157.9224072\nOGG\t1.979442230790783\tOGG\tKahului\tKahului\tHI\tUSA\t20.89864972\t-156.4304578\nTWF\t1.5513889212692544\tTWF\tJoslin Field - Magic Valley\tTwin Falls\tID\tUSA\t42.48180389\t-114.4877356\nHTS\t1.5266895227058117\tHTS\tTri-State/Walker-Long \tHuntington\tWV\tUSA\t38.36666667\t-82.55802778\nKOA\t1.4006809413818293\tKOA\tKona International At Keahole\tKailua/Kona\tHI\tUSA\t19.73876583\t-156.0456314\nSUN\t1.368320105147172\tSUN\tFriedman Memorial\tHailey\tID\tUSA\t43.50484139\t-114.2965903\nBTM\t1.0789046145051535\tBTM\tBert Mooney\tButte\tMT\tUSA\t45.95479528\t-112.49746\nIYK\t0.4090139019533203\tIYK\tInyokern\tInyokern\tCA\tUSA\t35.65884306\t-117.8295122\nCOD\t0.3675946246672692\tCOD\tYellowstone Regional\tCody\tWY\tUSA\t44.52019417\t-109.0237961\nCDC\t-0.02490748393976694\tCDC\tCedar City Muni\tCedar City\tUT\tUSA\t37.70097028\t-113.098575\nEKO\t-0.30303462218066124\tEKO\tElko Regional\tElko\tNV\tUSA\t40.82492611\t-115.7916964\nWYS\t-1.1296350505846586\tWYS\tYellowstone\tWest Yellowstone\tMT\tUSA\t44.68839917\t-111.1176375\nLIH\t-1.5492960816040193\tLIH\tLihue\tLihue\tHI\tUSA\t21.97598306\t-159.3389581\nITO\t-1.8361703507831761\tITO\tHilo International\tHilo\tHI\tUSA\t19.72026306\t-155.0484703\nGLH\t-3.0\tGLH\tMid Delta Regional\tGreenville\tMS\tUSA\t33.48288111\t-90.98561389\nPIH\t-3.378354139839701\tPIH\tPocatello Regional\tPocatello\tID\tUSA\t42.91130556\t-112.5958611\nHVN\t-6.0\tHVN\tTweed-New Haven\tNew Haven\tCT\tUSA\t41.26389889\t-72.8871\n"
+            "data": "Origin\tDepDelay\tiata\tairport\tcity\tstate\tcountry\tlat\tlong\nACK\t37.283018867924525\tACK\tNantucket Memorial\tNantucket\tMA\tUSA\t41.25305194\t-70.06018139\nPIR\t32.888888888888886\tPIR\tPierre Regional\tPierre\tSD\tUSA\t44.38267694\t-100.285965\nPUB\t27.0\tPUB\tPueblo Memorial\tPueblo\tCO\tUSA\t38.28908722\t-104.4965722\nSOP\t25.241042345276874\tSOP\tMoore County\tPinehurst/Southern Pines\tNC\tUSA\t35.23735278\t-79.39116944\nOTH\t21.590725806451612\tOTH\tNorth Bend Muni\tNorth Bend\tOR\tUSA\t43.41713889\t-124.2460278\nCEC\t20.91304347826087\tCEC\tJack McNamara \tCrescent City\tCA\tUSA\t41.78015722\t-124.2365333\nCKB\t20.0\tCKB\tBenedum\tClarksburg\tWV\tUSA\t39.29663889\t-80.22808333\nSPI\t19.83107642873537\tSPI\tCapital\tSpringfield\tIL\tUSA\t39.84395194\t-89.67761861\nAKN\t19.82608695652174\tAKN\tKing Salmon\tKing Salmon\tAK\tUSA\t58.67680167\t-156.6492175\nHHH\t19.80691642651297\tHHH\tHilton Head\tNA\tNA\tUSA\t32.224384\t-80.697629\nLMT\t19.690573770491802\tLMT\tKlamath Falls International\tKlamath Falls\tOR\tUSA\t42.15614361\t-121.7332081\nEYW\t17.81636060100167\tEYW\tKey West International\tKey West\tFL\tUSA\t24.55611111\t-81.75955556\nORD\t17.797794208420147\tORD\tChicago O\u0027Hare International\tChicago\tIL\tUSA\t41.979595\t-87.90446417\nEWR\t17.719568361535153\tEWR\tNewark Intl\tNewark\tNJ\tUSA\t40.69249722\t-74.16866056\nSBN\t16.84092332468462\tSBN\tSouth Bend Regional\tSouth Bend\tIN\tUSA\t41.70895361\t-86.31847417\nISO\t16.74355300859599\tISO\tKinston Regional Jetport At Stallin\tKinston\tNC\tUSA\t35.32807944\t-77.61552611\nFAY\t16.144870923913043\tFAY\tFayetteville Municipal\tFayetteville\tNC\tUSA\t34.99147222\t-78.88\nMTH\t15.968253968253968\tMTH\tFlorida Keys Marathon\tMarathon\tFL\tUSA\t24.72614083\t-81.05137806\nGNV\t15.48394495412844\tGNV\tGainesville Regional\tGainesville\tFL\tUSA\t29.69005556\t-82.27177778\nMCN\t15.372209391839878\tMCN\tMiddle Georgia Regional\tMacon\tGA\tUSA\t32.69284944\t-83.64921083\nAGS\t15.332597173144876\tAGS\tBush \tAugusta\tGA\tUSA\t33.369955\t-81.96449611\nADK\t15.243346007604563\tADK\tAdak\tAdak\tAK\tUSA\t51.87796389\t-176.6460306\nPHL\t15.11075888285848\tPHL\tPhiladelphia Intl\tPhiladelphia\tPA\tUSA\t39.87195278\t-75.24114083\nPWM\t14.83476109762243\tPWM\tPortland International Jetport\tPortland\tME\tUSA\t43.64616667\t-70.30875\nILG\t14.812413793103449\tILG\tNew Castle County \tWilmington\tDE\tUSA\t39.67872222\t-75.60652778\nCIC\t14.667686814588116\tCIC\tChico Municipal\tChico\tCA\tUSA\t39.79538278\t-121.8584231\nDHN\t14.630692855601122\tDHN\tDothan \tDothan\tAL\tUSA\t31.32133917\t-85.44962889\nCAE\t14.566650694777191\tCAE\tColumbia Metropolitan\tColumbia\tSC\tUSA\t33.93884\t-81.11953944\nJFK\t14.554701216226395\tJFK\tJohn F Kennedy Intl\tNew York\tNY\tUSA\t40.63975111\t-73.77892556\nDLG\t14.481781376518219\tDLG\tDillingham\tDillingham\tAK\tUSA\t59.0454125\t-158.5033389\nROA\t14.406393516434038\tROA\tRoanoke Regional/ Woodrum \tRoanoke\tVA\tUSA\t37.32546833\t-79.97542833\nBRW\t14.378654970760234\tBRW\tWiley Post Will Rogers Memorial\tBarrow\tAK\tUSA\t71.2854475\t-156.7660019\nAVL\t14.193799871594974\tAVL\tAsheville Regional\tAsheville\tNC\tUSA\t35.43619444\t-82.54180556\nPFN\t14.165059616381544\tPFN\tPanama City-Bay County International\tPanama City\tFL\tUSA\t30.21208333\t-85.68280556\nIAD\t14.04324337030319\tIAD\tWashington Dulles International\tChantilly\tVA\tUSA\t38.94453194\t-77.45580972\nAVP\t14.012208067940552\tAVP\tWilkes-Barre/Scranton Intl\tWilkes-Barre/Scranton\tPA\tUSA\t41.33814944\t-75.7242675\nVLD\t13.88108461287161\tVLD\tValdosta Regional\tValdosta\tGA\tUSA\t30.7825\t-83.27672222\nACY\t13.865594855305467\tACY\tAtlantic City International\tAtlantic City\tNJ\tUSA\t39.45758333\t-74.57716667\nLWB\t13.746880570409981\tLWB\tGreenbrier Valley\tLewisburg\tWV\tUSA\t37.85830556\t-80.39947222\nBTV\t13.735624846550454\tBTV\tBurlington International\tBurlington\tVT\tUSA\t44.47300361\t-73.1503125\nMIA\t13.71986837340387\tMIA\tMiami International\tMiami\tFL\tUSA\t25.79325\t-80.29055556\nBMI\t13.605117834642607\tBMI\tCentral Illinois Regional\tBloomington\tIL\tUSA\t40.47798556\t-88.91595278\nCWA\t13.476380952380952\tCWA\tCentral Wisconsin\tMosinee\tWI\tUSA\t44.77761917\t-89.66677944\nMDW\t13.472686825115694\tMDW\tChicago Midway\tChicago\tIL\tUSA\t41.7859825\t-87.75242444\nACV\t13.467929759704251\tACV\tArcata\tArcata/Eureka\tCA\tUSA\t40.97811528\t-124.1086189\nATL\t13.443744435961989\tATL\tWilliam B Hartsfield-Atlanta Intl\tAtlanta\tGA\tUSA\t33.64044444\t-84.42694444\nSGF\t13.424745379102225\tSGF\tSpringfield-Branson Regional\tSpringfield\tMO\tUSA\t37.24432611\t-93.38685806\nGTR\t13.272760511882998\tGTR\tGolden Triangle Regional\tColumbus-Starkville-West Point\tMS\tUSA\t33.45033444\t-88.59136861\nMEI\t13.233881725211205\tMEI\tKey \tMeridian\tMS\tUSA\t32.33313333\t-88.75120556\nBGR\t13.221916046661155\tBGR\tBangor International\tBangor\tME\tUSA\t44.80744444\t-68.82813889\nRDD\t13.192865105908584\tRDD\tRedding Municipal\tRedding\tCA\tUSA\t40.50898361\t-122.2934019\nEGE\t12.969810489202292\tEGE\tEagle County Regional\tEagle\tCO\tUSA\t39.64256778\t-106.9176953\nCSG\t12.954343534057255\tCSG\tColumbus Metropolitan\tColumbus\tGA\tUSA\t32.51633333\t-84.93886111\nXNA\t12.707431846263045\tXNA\tNorthwest Arkansas Regional\tFayetteville/Springdale/Rogers\tAR\tUSA\t36.28186944\t-94.30681111\nOAJ\t12.7015503875969\tOAJ\tAlbert J Ellis\tJacksonville\tNC\tUSA\t34.82916444\t-77.61213778\nJNU\t12.57285025656974\tJNU\tJuneau International\tJuneau\tAK\tUSA\t58.35496194\t-134.5762764\nASE\t12.54201292705448\tASE\tAspen-Pitkin Co/Sardy \tAspen\tCO\tUSA\t39.22316\t-106.868845\nFWA\t12.487054920315185\tFWA\tFort Wayne International\tFort Wayne\tIN\tUSA\t40.97846583\t-85.19514639\nDFW\t12.459863037867308\tDFW\tDallas-Fort Worth International\tDallas-Fort Worth\tTX\tUSA\t32.89595056\t-97.0372\nHPN\t12.451983262440779\tHPN\tWestchester Cty\tWhite Plains\tNY\tUSA\t41.06695778\t-73.70757444\nABY\t12.377922784121806\tABY\tSouthwest Georgia Regional\tAlbany\tGA\tUSA\t31.535515\t-84.19447333\nROC\t12.26842781604837\tROC\tGreater Rochester Int\u0027l\tRochester\tNY\tUSA\t43.11886611\t-77.67238389\nHOU\t12.199558272626325\tHOU\tWilliam P Hobby\tHouston\tTX\tUSA\t29.64541861\t-95.27888889\nSFO\t12.150888993286255\tSFO\tSan Francisco International\tSan Francisco\tCA\tUSA\t37.61900194\t-122.3748433\nCMX\t12.08994708994709\tCMX\tHoughton County Memorial\tHancock\tMI\tUSA\t47.16841722\t-88.48906083\nEWN\t12.016070124178233\tEWN\tCraven County Regional\tNew Bern\tNC\tUSA\t35.07297222\t-77.04294444\nBTR\t11.994256926952142\tBTR\tBaton Rouge Metropolitan, Ryan \tBaton Rouge\tLA\tUSA\t30.53316083\t-91.14963444\nLGA\t11.924118463095414\tLGA\tLaGuardia\tNew York\tNY\tUSA\t40.77724306\t-73.87260917\nPMD\t11.851885924563017\tPMD\tPalmdale Production Flight\tPalmdale\tCA\tUSA\t34.62938889\t-118.0845528\nPSG\t11.841569767441861\tPSG\tJames C. Johnson Petersburg\tPetersburg\tAK\tUSA\t56.80165194\t-132.9452781\nLNK\t11.723013839056893\tLNK\tLincoln Municipal\tLincoln\tNE\tUSA\t40.85097222\t-96.75925\nBUF\t11.696265380099046\tBUF\tBuffalo Niagara Intl\tBuffalo\tNY\tUSA\t42.94052472\t-78.73216667\nTEX\t11.65913043478261\tTEX\tTelluride Regional\tTelluride\tCO\tUSA\t37.95375861\t-107.90848\nTVC\t11.585604770017035\tTVC\tCherry Capital\tTraverse City\tMI\tUSA\t44.74144472\t-85.582235\nGSO\t11.517171519929702\tGSO\tPiedmont Triad International\tGreensboro\tNC\tUSA\t36.09774694\t-79.9372975\nDAB\t11.498798798798799\tDAB\tDaytona Beach International\tDaytona Beach\tFL\tUSA\t29.17991667\t-81.05805556\nAPF\t11.455859969558599\tAPF\tNaples Municipal\tNaples\tFL\tUSA\t26.15247222\t-81.77544444\nLIT\t11.441481850652048\tLIT\tAdams \tLittle Rock\tAR\tUSA\t34.72939611\t-92.22424556\nMOD\t11.43071110511402\tMOD\tModesto City-County-Harry Sham \tModesto\tCA\tUSA\t37.62581722\t-120.9544214\nMDT\t11.377033818894285\tMDT\tHarrisburg Intl\tHarrisburg\tPA\tUSA\t40.19349528\t-76.76340361\nSYR\t11.367786625940875\tSYR\tSyracuse-Hancock Intl\tSyracuse\tNY\tUSA\t43.11118694\t-76.10631056\nCLT\t11.339384949249386\tCLT\tCharlotte/Douglas International\tCharlotte\tNC\tUSA\t35.21401111\t-80.94312583\nCRW\t11.317662483611164\tCRW\tYeager\tCharleston\tWV\tUSA\t38.37315083\t-81.59318972\nRIC\t11.292631468824103\tRIC\tRichmond International\tRichmond\tVA\tUSA\t37.50516667\t-77.31966667\nMLI\t11.236518246303735\tMLI\tQuad City\tMoline\tIL\tUSA\t41.44852639\t-90.50753917\nALO\t11.187265917602996\tALO\tWaterloo Municipal\tWaterloo\tIA\tUSA\t42.55708139\t-92.40034361\nPIA\t11.143669600541639\tPIA\tGreater Peoria Regional\tPeoria\tIL\tUSA\t40.66424333\t-89.69330556\nGST\t11.132\tGST\tGustavus\tGustavus\tAK\tUSA\t58.42438139\t-135.7073814\nATW\t11.102737956864264\tATW\tOutagamie County Regional\tAppleton\tWI\tUSA\t44.25740806\t-88.51947556\nSTX\t11.10093896713615\tSTX\tHenry E. Rohlsen \tChristiansted\tVI\tUSA\t17.70188889\t-64.79855556\nVPS\t10.9957745761849\tVPS\tEglin Air Force Base\tValparaiso\tFL\tUSA\t30.48325\t-86.5254\nTRI\t10.970774263904035\tTRI\tTri-Cities Regional\tBristol\tTN\tUSA\t36.47521417\t-82.40742056\nSDF\t10.951295849767657\tSDF\tLouisville International-Standiford \tLouisville\tKY\tUSA\t38.17438889\t-85.736\nLAS\t10.92196270684905\tLAS\tMcCarran International\tLas Vegas\tNV\tUSA\t36.08036111\t-115.1523333\nBOS\t10.908379624935256\tBOS\tGen Edw L Logan Intl\tBoston\tMA\tUSA\t42.3643475\t-71.00517917\nCMH\t10.852758822751072\tCMH\tPort Columbus Intl\tColumbus\tOH\tUSA\t39.99798528\t-82.89188278\nSAV\t10.813581325677195\tSAV\tSavannah International\tSavannah\tGA\tUSA\t32.12758333\t-81.20213889\nFLO\t10.797845048742944\tFLO\tFlorence Regional\tFlorence\tSC\tUSA\t34.18536111\t-79.72388889\nFSD\t10.77778385174657\tFSD\tJoe Foss \tSioux Falls\tSD\tUSA\t43.58135111\t-96.74170028\nRDU\t10.683302859731207\tRDU\tRaleigh-Durham International\tRaleigh\tNC\tUSA\t35.87763889\t-78.78747222\nMGM\t10.675302087147564\tMGM\tMontgomery Regional Apt\tMontgomery\tAL\tUSA\t32.30064417\t-86.39397611\nORF\t10.645006060386779\tORF\tNorfolk International\tNorfolk\tVA\tUSA\t36.89461111\t-76.20122222\nIAH\t10.560090075984956\tIAH\tGeorge Bush Intercontinental\tHouston\tTX\tUSA\t29.98047222\t-95.33972222\nCHS\t10.549948303874748\tCHS\tCharleston AFB/International\tCharleston\tSC\tUSA\t32.89864639\t-80.04050583\nDEN\t10.545315560515647\tDEN\tDenver Intl\tDenver\tCO\tUSA\t39.85840806\t-104.6670019\nBWI\t10.496691732647783\tBWI\tBaltimore-Washington International\tBaltimore\tMD\tUSA\t39.17540167\t-76.66819833\nDAL\t10.47891183787706\tDAL\tDallas Love \tDallas\tTX\tUSA\t32.84711389\t-96.85177222\nILM\t10.429570046921382\tILM\tWilmington International\tWilmington\tNC\tUSA\t34.27061111\t-77.90255556\nPIT\t10.42765646238402\tPIT\tPittsburgh International\tPittsburgh\tPA\tUSA\t40.49146583\t-80.23287083\nMHT\t10.41158917765516\tMHT\tManchester\tManchester\tNH\tUSA\t42.93451639\t-71.43705583\nBNA\t10.39337012183352\tBNA\tNashville International\tNashville\tTN\tUSA\t36.12447667\t-86.67818222\nFLL\t10.375234251831873\tFLL\tFort Lauderdale-Hollywood Int\u0027l\tFt. Lauderdale\tFL\tUSA\t26.07258333\t-80.15275\nCMI\t10.356836077308518\tCMI\tUniversity of Illinois-Willard\tChampaign/Urbana\tIL\tUSA\t40.03925\t-88.27805556\nBQK\t10.307067137809188\tBQK\tGlynco Jetport\tBrunswick\tGA\tUSA\t31.25902778\t-81.46630556\nPVD\t10.293077631090902\tPVD\tTheodore F Green State\tProvidence\tRI\tUSA\t41.72399917\t-71.42822111\nCID\t10.280709296077378\tCID\tEastern Iowa \tCedar Rapids\tIA\tUSA\t41.88458833\t-91.71087222\nMSN\t10.264698271400476\tMSN\tDane County Regional\tMadison\tWI\tUSA\t43.13985778\t-89.33751361\nALB\t10.231383230696352\tALB\tAlbany Cty\tAlbany\tNY\tUSA\t42.74811944\t-73.80297861\nGRB\t10.189852414636276\tGRB\tAustin Straubel International\tGreen Bay\tWI\tUSA\t44.48507333\t-88.12959\nPBI\t10.180626202306067\tPBI\tPalm Beach International\tWest Palm Beach\tFL\tUSA\t26.68316194\t-80.09559417\nTTN\t10.156862745098039\tTTN\tTrenton-Mercer County \tTrenton\tNJ\tUSA\t40.27669111\t-74.81346833\nRST\t10.128673383711167\tRST\tRochester International\tRochester\tMN\tUSA\t43.90882639\t-92.49798722\nSJU\t10.090403277981453\tSJU\tLuis Munoz Marin International\tSan Juan\tPR\tUSA\t18.43941667\t-66.00183333\nDTW\t10.027920864691195\tDTW\tDetroit Metropolitan-Wayne County\tDetroit\tMI\tUSA\t42.21205889\t-83.34883583\nMKE\t10.027106562469346\tMKE\tGeneral Mitchell International\tMilwaukee\tWI\tUSA\t42.94722222\t-87.89658333\nDSM\t10.00521227588295\tDSM\tDes Moines International\tDes Moines\tIA\tUSA\t41.53493306\t-93.66068222\nMLU\t9.874455445544555\tMLU\tMonroe Regional\tMonroe\tLA\tUSA\t32.51086556\t-92.03768778\nMYR\t9.86942607211436\tMYR\tMyrtle Beach International\tMyrtle Beach\tSC\tUSA\t33.67975\t-78.92833333\nMQT\t9.864902506963789\tMQT\tMarquette County Airport\tNA\tNA\tUSA\t46.353639\t-87.395361\nSEA\t9.860253339174363\tSEA\tSeattle-Tacoma Intl\tSeattle\tWA\tUSA\t47.44898194\t-122.3093131\nICT\t9.755343110265779\tICT\tWichita Mid-Continent\tWichita\tKS\tUSA\t37.64995889\t-97.43304583\nMCO\t9.722480533452636\tMCO\tOrlando International\tOrlando\tFL\tUSA\t28.42888889\t-81.31602778\nCAK\t9.627041173651811\tCAK\tAkron-Canton Regional\tAkron\tOH\tUSA\t40.91631194\t-81.44246556\nSWF\t9.619060953981144\tSWF\tStewart\tNewburgh\tNY\tUSA\t41.50409361\t-74.10483833\nPHF\t9.608348888511793\tPHF\tNewport News/Williamsburg International\tNewport News\tVA\tUSA\t37.13189556\t-76.4929875\nBET\t9.546739479601671\tBET\tBethel\tBethel\tAK\tUSA\t60.77977639\t-161.8379975\nSTL\t9.545737160378161\tSTL\tLambert-St Louis International\tSt Louis\tMO\tUSA\t38.74768694\t-90.35998972\nGSP\t9.513354214123007\tGSP\tGreenville-Spartanburg\tGreer\tSC\tUSA\t34.89566722\t-82.21885833\nSCC\t9.492776057791538\tSCC\tDeadhorse\tDeadhorse\tAK\tUSA\t70.19475583\t-148.4651608\nOME\t9.491739552964043\tOME\tNome\tNome\tAK\tUSA\t64.51220222\t-165.4452458\nPHX\t9.479764632772751\tPHX\tPhoenix Sky Harbor International\tPhoenix\tAZ\tUSA\t33.43416667\t-112.0080556\nJAC\t9.45496254681648\tJAC\tJackson Hole\tJackson\tWY\tUSA\t43.60732417\t-110.7377389\nTYS\t9.422640487474611\tTYS\tMcGhee-Tyson\tKnoxville\tTN\tUSA\t35.81248722\t-83.99285583\nHDN\t9.413448370309505\tHDN\tYampa Valley\tHayden\tCO\tUSA\t40.48118028\t-107.2176597\nLEX\t9.38616604897648\tLEX\tBlue Grass \tLexington\tKY\tUSA\t38.03697222\t-84.60538889\nLAN\t9.371753117801255\tLAN\tCapital City\tLansing\tMI\tUSA\t42.7787\t-84.58735806\nGPT\t9.324572044749967\tGPT\tGulfport-Biloxi Regional\tGulfport-Biloxi\tMS\tUSA\t30.40728028\t-89.07009278\nMLB\t9.306867998051631\tMLB\tMelbourne International \tMelbourne\tFL\tUSA\t28.10275\t-80.64580556\nBHM\t9.301273875562796\tBHM\tBirmingham International\tBirmingham\tAL\tUSA\t33.56294306\t-86.75354972\nPNS\t9.219969172803562\tPNS\tPensacola Regional\tPensacola\tFL\tUSA\t30.47330556\t-87.18744444\nCHA\t9.17102796730899\tCHA\tLovell \tChattanooga\tTN\tUSA\t35.03526833\t-85.20378778\nLBB\t9.14208626111262\tLBB\tLubbock International\tLubbock\tTX\tUSA\t33.66363889\t-101.8227778\nMFR\t9.116221811873986\tMFR\tRogue Valley International\tMedford\tOR\tUSA\t42.37422778\t-122.8734978\nOMA\t9.09292815802882\tOMA\tEppley Airfield\tOmaha\tNE\tUSA\t41.30251861\t-95.89417306\nHRL\t9.077336558489552\tHRL\tValley International\tHarlingen\tTX\tUSA\t26.22850611\t-97.65439389\nGRK\t9.04114768683274\tGRK\tRobert Gray AAF\tKilleen\tTX\tUSA\t31.06489778\t-97.82779778\nJAX\t8.976586493143188\tJAX\tJacksonville International\tJacksonville\tFL\tUSA\t30.49405556\t-81.68786111\nOTZ\t8.946539849130863\tOTZ\tRalph Wien Memorial\tKotzebue\tAK\tUSA\t66.88467694\t-162.5985497\nMOB\t8.9116874214555\tMOB\tMobile Regional\tMobile\tAL\tUSA\t30.69141667\t-88.24283333\nSHV\t8.889794351053844\tSHV\tShreveport Regional\tShreveport\tLA\tUSA\t32.4466275\t-93.82559833\nRSW\t8.87620079991029\tRSW\tSouthwest Florida International\tFt. Myers\tFL\tUSA\t26.53616667\t-81.75516667\nTLH\t8.837072199678431\tTLH\tTallahassee Regional\tTallahassee\tFL\tUSA\t30.39652778\t-84.35033333\nROW\t8.832203389830509\tROW\tRoswell Industrial Air Center\tRoswell\tNM\tUSA\t33.30155556\t-104.5305556\nMCI\t8.812316368250388\tMCI\tKansas City International\tKansas City\tMO\tUSA\t39.29760528\t-94.71390556\nAEX\t8.811912623825247\tAEX\tAlexandria International\tAlexandria\tLA\tUSA\t31.32737167\t-92.54855611\nMSY\t8.799136583692295\tMSY\tNew Orleans International \tNew Orleans\tLA\tUSA\t29.99338889\t-90.25802778\nJAN\t8.785960214231064\tJAN\tJackson International\tJackson\tMS\tUSA\t32.31116667\t-90.07588889\nEVV\t8.781247914581249\tEVV\tEvansville Regional\tEvansville\tIN\tUSA\t38.03799139\t-87.53062667\nITH\t8.766666666666667\tITH\tTompkins Cty \tIthaca\tNY\tUSA\t42.49102778\t-76.45844444\nTUL\t8.746866219226346\tTUL\tTulsa International\tTulsa\tOK\tUSA\t36.19837222\t-95.88824167\nTPA\t8.727537434009868\tTPA\tTampa International \tTampa\tFL\tUSA\t27.97547222\t-82.53325\nABE\t8.69421705835754\tABE\tLehigh Valley International\tAllentown\tPA\tUSA\t40.65236278\t-75.44040167\nISP\t8.643222771251887\tISP\tLong Island - MacArthur\tIslip\tNY\tUSA\t40.7952425\t-73.10021194\nKTN\t8.637530650512044\tKTN\tKetchikan International\tKetchikan\tAK\tUSA\t55.35556861\t-131.71374\nMSP\t8.621480876353415\tMSP\tMinneapolis-St Paul Intl\tMinneapolis\tMN\tUSA\t44.88054694\t-93.2169225\nOKC\t8.599627688913403\tOKC\tWill Rogers World\tOklahoma City\tOK\tUSA\t35.39308833\t-97.60073389\nANC\t8.57273388017859\tANC\tTed Stevens Anchorage International\tAnchorage\tAK\tUSA\t61.17432028\t-149.9961856\nSTT\t8.54114541489728\tSTT\tCyril E. King\tCharlotte Amalie\tVI\tUSA\t18.33730556\t-64.97336111\nGUC\t8.539897621198435\tGUC\tGunnison County\tGunnison\tCO\tUSA\t38.53396333\t-106.9331817\nMAF\t8.508437886552395\tMAF\tMidland International\tMidland\tTX\tUSA\t31.94252778\t-102.2019139\nLFT\t8.494236497862971\tLFT\tLafayette Regional\tLafayette\tLA\tUSA\t30.20527972\t-91.987655\nLAX\t8.484659666132144\tLAX\tLos Angeles International\tLos Angeles\tCA\tUSA\t33.94253611\t-118.4080744\nCVG\t8.43224328122474\tCVG\tCincinnati Northern Kentucky Intl\tCovington\tKY\tUSA\t39.04614278\t-84.6621725\nCLE\t8.417349376271787\tCLE\tCleveland-Hopkins Intl\tCleveland\tOH\tUSA\t41.41089417\t-81.84939667\nMBS\t8.403987068965517\tMBS\tMbs International\tSaginaw\tMI\tUSA\t43.53291472\t-84.07964722\nBDL\t8.354679537594674\tBDL\tBradley International\tWindsor Locks\tCT\tUSA\t41.93887417\t-72.68322833\nAZO\t8.334698292513327\tAZO\tKalamazoo County\tKalamazoo\tMI\tUSA\t42.234875\t-85.5520575\nMEM\t8.330592798314498\tMEM\tMemphis International\tMemphis\tTN\tUSA\t35.04241667\t-89.97666667\nOAK\t8.329239422069817\tOAK\tMetropolitan Oakland International\tOakland\tCA\tUSA\t37.72129083\t-122.2207167\nDBQ\t8.305279265493496\tDBQ\tDubuque Municipal\tDubuque\tIA\tUSA\t42.40295944\t-90.70916722\nGCC\t8.273879142300196\tGCC\tGillette-Campbell County\tGillette\tWY\tUSA\t44.34889806\t-105.5393614\nBGM\t8.235190097259062\tBGM\tBinghamton Regional\tBinghamton\tNY\tUSA\t42.20848278\t-75.97961361\nTOL\t8.119756132965597\tTOL\tToledo Express\tToledo\tOH\tUSA\t41.58680556\t-83.80783333\nSUX\t8.08904109589041\tSUX\tSioux Gateway \tSioux City\tIA\tUSA\t42.40260333\t-96.38436694\nLSE\t8.048104708482066\tLSE\tLa Crosse Municipal\tLa Crosse\tWI\tUSA\t43.87937972\t-91.25653778\nCRP\t8.007434585304624\tCRP\tCorpus Christi International\tCorpus Christi\tTX\tUSA\t27.77036083\t-97.50121528\nMKC\t8.0\tMKC\tDowntown\tKansas City\tMO\tUSA\t39.12324111\t-94.592735\nTUP\t7.888024883359254\tTUP\tTupelo Municipal \tTupelo\tMS\tUSA\t34.26810833\t-88.769895\nSRQ\t7.880493850700734\tSRQ\tSarasota Bradenton International\tSarasota\tFL\tUSA\t27.39533333\t-82.55411111\nHSV\t7.850983110203188\tHSV\tHuntsville International \tHuntsville\tAL\tUSA\t34.6404475\t-86.77310944\nGRR\t7.847547106817186\tGRR\tKent County International\tGrand Rapids\tMI\tUSA\t42.88081972\t-85.52276778\nSMF\t7.820576656569249\tSMF\tSacramento International\tSacramento\tCA\tUSA\t38.69542167\t-121.5907669\nAMA\t7.814112622036262\tAMA\tAmarillo International\tAmarillo\tTX\tUSA\t35.2193725\t-101.7059272\nAUS\t7.810709282632786\tAUS\tAustin-Bergstrom International\tAustin\tTX\tUSA\t30.19453278\t-97.66987194\nDCA\t7.745954408339379\tDCA\tRonald Reagan Washington National\tArlington\tVA\tUSA\t38.85208333\t-77.03772222\nRNO\t7.713932729624839\tRNO\tReno/Tahoe International\tReno\tNV\tUSA\t39.49857611\t-119.7680647\nSAT\t7.702058750254796\tSAT\tSan Antonio International\tSan Antonio\tTX\tUSA\t29.53369444\t-98.46977778\nDAY\t7.683205063982877\tDAY\tJames M Cox Dayton Intl\tDayton\tOH\tUSA\t39.90237583\t-84.219375\nFSM\t7.636768182450285\tFSM\tFort Smith Regional\tFort Smith\tAR\tUSA\t35.33659028\t-94.36744111\nEAU\t7.606060606060606\tEAU\tChippewa Valley Regional\tEau Claire\tWI\tUSA\t44.86525722\t-91.48507194\nABQ\t7.575446402138332\tABQ\tAlbuquerque International\tAlbuquerque\tNM\tUSA\t35.04022222\t-106.6091944\nFAR\t7.547835269271383\tFAR\tHector International\tFargo\tND\tUSA\t46.91934889\t-96.81498889\nIND\t7.518656962192069\tIND\tIndianapolis International\tIndianapolis\tIN\tUSA\t39.71732917\t-86.29438417\nLYH\t7.45085296506905\tLYH\tLynchburg Municipal-Preston Glenn \tLynchburg\tVA\tUSA\t37.32668528\t-79.20043056\nCOS\t7.401931799773206\tCOS\tCity of Colorado Springs Muni\tColorado Springs\tCO\tUSA\t38.80580556\t-104.70025\nWRG\t7.383687258687258\tWRG\tWrangell\tWrangell\tAK\tUSA\t56.48432583\t-132.3698242\nFNT\t7.307618757877353\tFNT\tBishop\tFlint\tMI\tUSA\t42.96550333\t-83.74345639\nBUR\t7.269096725670279\tBUR\tBurbank-Glendale-Pasadena\tBurbank\tCA\tUSA\t34.20061917\t-118.3584969\nABI\t7.245992601726264\tABI\tAbilene Regional\tAbilene\tTX\tUSA\t32.41132\t-99.68189722\nCHO\t7.181506009320579\tCHO\tCharlottesville-Albermarle\tCharlottesville\tVA\tUSA\t38.13863889\t-78.45286111\nSAN\t7.136349505265377\tSAN\tSan Diego International-Lindbergh \tSan Diego\tCA\tUSA\t32.73355611\t-117.1896567\nLRD\t7.083932522123894\tLRD\tLaredo International\tLaredo\tTX\tUSA\t27.54373861\t-99.46154361\nELP\t6.991576882356605\tELP\tEl Paso International\tEl Paso\tTX\tUSA\t31.80666667\t-106.3778056\nADQ\t6.989218328840971\tADQ\tKodiak \tKodiak\tAK\tUSA\t57.74996778\t-152.4938553\nONT\t6.929120318125638\tONT\tOntario International\tOntario\tCA\tUSA\t34.056\t-117.6011944\nTXK\t6.916789613455297\tTXK\tTexarkana Regional-Webb \tTexarkana\tAR\tUSA\t33.45370806\t-93.99102\nMRY\t6.907772670288341\tMRY\tMonterey Peninsula\tMonterey\tCA\tUSA\t36.5869825\t-121.8429478\nPSP\t6.897249404919333\tPSP\tPalm Springs International\tPalm Springs\tCA\tUSA\t33.82921556\t-116.5062531\nPDX\t6.63721264784533\tPDX\tPortland Intl\tPortland\tOR\tUSA\t45.58872222\t-122.5975\nCLL\t6.61720566476432\tCLL\tEasterwood \tCollege Station\tTX\tUSA\t30.58858944\t-96.36382417\nSBP\t6.61490907217557\tSBP\tSan Luis Obispo Co-McChesney \tSan Luis Obispo\tCA\tUSA\t35.23705806\t-120.6423931\nFAT\t6.446620383980462\tFAT\tFresno Yosemite International\tFresno\tCA\tUSA\t36.77619444\t-119.7181389\nSJC\t6.424864219232416\tSJC\tSan Jose International\tSan Jose\tCA\tUSA\t37.36186194\t-121.9290089\nHKY\t6.351351351351352\tHKY\tHickory Municipal\tHickory\tNC\tUSA\t35.74114639\t-81.38954889\nMTJ\t6.34453114667372\tMTJ\tMontrose Regional\tMontrose\tCO\tUSA\t38.50886722\t-107.8938333\nSJT\t6.326264959059416\tSJT\tSan Angelo Regional /Mathis \tSan Angelo\tTX\tUSA\t31.35775\t-100.4963056\nGGG\t6.281588447653429\tGGG\tGregg County\tLongview\tTX\tUSA\t32.38486111\t-94.71171\nBOI\t6.278407994752479\tBOI\tBoise Air Terminal\tBoise\tID\tUSA\t43.56444444\t-116.2227778\nSNA\t6.2716495881052845\tSNA\tJohn Wayne /Orange Co\tSanta Ana\tCA\tUSA\t33.67565861\t-117.8682225\nRHI\t6.224938875305623\tRHI\tRhinelander-Oneida County\tRhinelander\tWI\tUSA\t45.63119306\t-89.46745361\nSIT\t6.1936483346243225\tSIT\tSitka\tSitka\tAK\tUSA\t57.04713806\t-135.3615983\nINL\t6.168539325842697\tINL\tFalls International\tInternational Falls\tMN\tUSA\t48.56618722\t-93.40306667\nGJT\t6.119344990285873\tGJT\tWalker \tGrand Junction\tCO\tUSA\t39.1224125\t-108.5267347\nMFE\t6.062280898038338\tMFE\tMcAllen Miller International\tMcAllen\tTX\tUSA\t26.17583333\t-98.23861111\nYUM\t6.0562828475871955\tYUM\tYuma MCAS-Yuma International\tYuma\tAZ\tUSA\t32.65658333\t-114.6059722\nTYR\t6.029064869418702\tTYR\tTyler Pounds \tTyler\tTX\tUSA\t32.35413889\t-95.40238611\nTUS\t5.994277539341917\tTUS\tTucson International\tTucson\tAZ\tUSA\t32.11608333\t-110.9410278\nERI\t5.968696642003415\tERI\tErie Intl\tErie\tPA\tUSA\t42.08202139\t-80.17621556\nSBA\t5.968688508461236\tSBA\tSanta Barbara Municipal\tSanta Barbara\tCA\tUSA\t34.42621194\t-119.8403733\nPLN\t5.869623655913978\tPLN\tPellston Regional  of Emmet County\tPellston\tMI\tUSA\t45.5709275\t-84.796715\nLAW\t5.859325366812888\tLAW\tLawton-Ft Sill Regional\tLawton\tOK\tUSA\t34.56771444\t-98.41663667\nSLC\t5.820532442945813\tSLC\tSalt Lake City Intl\tSalt Lake City\tUT\tUSA\t40.78838778\t-111.9777731\nSPS\t5.809745899002895\tSPS\tSheppard AFB/Wichita Falls Municipal\tWichita Falls\tTX\tUSA\t33.98879611\t-98.49189333\nRDM\t5.7383221225710015\tRDM\tRoberts \tRedmond\tOR\tUSA\t44.25406722\t-121.1499633\nLGB\t5.679563397698088\tLGB\tLong Beach (Daugherty )\tLong Beach\tCA\tUSA\t33.81772222\t-118.1516111\nEUG\t5.585646356297689\tEUG\tMahlon Sweet \tEugene\tOR\tUSA\t44.12326\t-123.2186856\nLCH\t5.583572659391154\tLCH\tLake Charles Regional\tLake Charles\tLA\tUSA\t30.1260975\t-93.22340361\nBZN\t5.563738008144109\tBZN\tGallatin \tBozeman\tMT\tUSA\t45.77690139\t-111.1530072\nCDV\t5.489161168708765\tCDV\tMerle K (Mudhole) Smith\tCordova\tAK\tUSA\t60.49183389\t-145.4776503\nGEG\t5.375399748571932\tGEG\tSpokane Intl\tSpokane\tWA\tUSA\t47.61985556\t-117.5338425\nBJI\t5.3689839572192515\tBJI\tBemidji-Beltrami County\tBemidji\tMN\tUSA\t47.50942417\t-94.93372333\nBRO\t5.266628440366972\tBRO\tBrownsville/S.Padre Island International\tBrownsville\tTX\tUSA\t25.90683333\t-97.42586111\nELM\t5.098214285714286\tELM\tElmira/Corning Regional\tElmira\tNY\tUSA\t42.15991361\t-76.89144333\nSCE\t5.071968014215904\tSCE\tUniversity Park\tNA\tNA\tUSA\t40.851206\t-77.846302\nFAI\t5.053442531926708\tFAI\tFairbanks International\tFairbanks\tAK\tUSA\t64.8136775\t-147.8596694\nYKM\t5.009408602150538\tYKM\tYakima Air Terminal\tYakima\tWA\tUSA\t46.56816972\t-120.5440594\nBQN\t4.93029490616622\tBQN\tRafael Hernandez\tAguadilla\tPR\tUSA\t18.49486111\t-67.12944444\nBPT\t4.755717255717256\tBPT\tSoutheast Texas Regional\tBeaumont/Port Arthur\tTX\tUSA\t29.95083333\t-94.02069444\nACT\t4.729808429118774\tACT\tWaco Regional\tWaco\tTX\tUSA\t31.61128833\t-97.23051917\nBFL\t4.677045619116583\tBFL\tMeadows \tBakersfield\tCA\tUSA\t35.43359806\t-119.0567681\nBIS\t4.672567532126934\tBIS\tBismarck Municipal\tBismarck\tND\tUSA\t46.77411111\t-100.7467222\nRAP\t4.5531497493279085\tRAP\tRapid City Regional\tRapid City\tSD\tUSA\t44.04532139\t-103.0573708\nDRO\t4.4643170261266\tDRO\tDurango-La Plata County\tDurango\tCO\tUSA\t37.15151667\t-107.7537692\nDLH\t4.4168646080760094\tDLH\tDuluth International\tDuluth\tMN\tUSA\t46.84209028\t-92.19364861\nFLG\t4.392047637341529\tFLG\tFlagstaff Pulliam\tFlagstaff\tAZ\tUSA\t35.13845472\t-111.6712183\nGFK\t4.280084235860409\tGFK\tGrand Forks International\tGrand Forks\tND\tUSA\t47.949255\t-97.17611111\nRKS\t3.868905742145179\tRKS\tRock Springs-Sweetwater County\tRock Springs\tWY\tUSA\t41.5942175\t-109.0651928\nCLD\t3.841947663064705\tCLD\tMC Clellan-Palomar Airport\tNA\tNA\tUSA\t33.127231\t-117.278727\nYAK\t3.7097852028639617\tYAK\tYakutat\tYakutat\tAK\tUSA\t59.50336056\t-139.6602261\nMSO\t3.5525309541150767\tMSO\tMissoula International\tMissoula\tMT\tUSA\t46.91630556\t-114.0905556\nCPR\t3.4740886904143733\tCPR\tNatrona County Intl\tCasper\tWY\tUSA\t42.90835556\t-106.4644661\nIPL\t3.4038011695906434\tIPL\tImperial County\tImperial\tCA\tUSA\t32.83422028\t-115.5787456\nBIL\t3.237911166216906\tBIL\tBillings Logan Intl\tBillings\tMT\tUSA\t45.8076625\t-108.5428611\nMKG\t2.8282051282051284\tMKG\tMuskegon County\tMuskegon\tMI\tUSA\t43.16948806\t-86.23822306\nSMX\t2.7663459650500686\tSMX\tSanta Maria Pub/Capt G Allan Hancock \tSanta Maria\tCA\tUSA\t34.89924833\t-120.4575825\nSLE\t2.364880273660205\tSLE\tMcNary Fld\tSalem\tOR\tUSA\t44.90952778\t-123.0025\nFCA\t1.9680764301526272\tFCA\tGlacier Park Intl\tKalispell\tMT\tUSA\t48.31140472\t-114.2550694\nPSE\t1.953478260869565\tPSE\tMercedita\tPonce\tPR\tUSA\t18.00830278\t-66.56301194\nMOT\t1.8368683718028695\tMOT\tMinot International\tMinot\tND\tUSA\t48.25937778\t-101.2803339\nPSC\t1.7193427731765962\tPSC\tTri-Cities\tPasco\tWA\tUSA\t46.26468028\t-119.1190292\nRFD\t1.7009102730819246\tRFD\tGreater Rockford\tRockford\tIL\tUSA\t42.19536389\t-89.09721111\nHLN\t1.4947029890276202\tHLN\tHelena Regional\tHelena\tMT\tUSA\t46.60681806\t-111.9827503\nIDA\t1.3708536045997346\tIDA\tIdaho Falls Regional\tIdaho Falls\tID\tUSA\t43.51455556\t-112.0701667\nHNL\t1.3465930159007133\tHNL\tHonolulu International\tHonolulu\tHI\tUSA\t21.31869111\t-157.9224072\nLWS\t1.3185328185328185\tLWS\tLewiston-Nez Perce County\tLewiston\tID\tUSA\t46.37449806\t-117.0153944\nBLI\t1.317184643510055\tBLI\tBellingham Intl\tBellingham\tWA\tUSA\t48.79275\t-122.5375278\nOGG\t1.2670753064798599\tOGG\tKahului\tKahului\tHI\tUSA\t20.89864972\t-156.4304578\nHTS\t1.2547348484848484\tHTS\tTri-State/Walker-Long \tHuntington\tWV\tUSA\t38.36666667\t-82.55802778\nSGU\t1.062627241880756\tSGU\tSt George Muni\tSt George\tUT\tUSA\t37.09058333\t-113.5930556\nKOA\t0.5895154502825538\tKOA\tKona International At Keahole\tKailua/Kona\tHI\tUSA\t19.73876583\t-156.0456314\nOXR\t0.30634310427679\tOXR\tOxnard\tOxnard\tCA\tUSA\t34.20080083\t-119.2072164\nGTF\t-0.23770296084049666\tGTF\tGreat Falls Intl\tGreat Falls\tMT\tUSA\t47.48200194\t-111.3706853\nBTM\t-0.6693191865605659\tBTM\tBert Mooney\tButte\tMT\tUSA\t45.95479528\t-112.49746\nSUN\t-0.7549959570289939\tSUN\tFriedman Memorial\tHailey\tID\tUSA\t43.50484139\t-114.2965903\nTWF\t-0.9640384940064156\tTWF\tJoslin Field - Magic Valley\tTwin Falls\tID\tUSA\t42.48180389\t-114.4877356\nIYK\t-1.1279772484891575\tIYK\tInyokern\tInyokern\tCA\tUSA\t35.65884306\t-117.8295122\nLIH\t-1.1671885668542368\tLIH\tLihue\tLihue\tHI\tUSA\t21.97598306\t-159.3389581\nCDC\t-1.208540218470705\tCDC\tCedar City Muni\tCedar City\tUT\tUSA\t37.70097028\t-113.098575\nEKO\t-1.5953940837800278\tEKO\tElko Regional\tElko\tNV\tUSA\t40.82492611\t-115.7916964\nCOD\t-1.6104651162790697\tCOD\tYellowstone Regional\tCody\tWY\tUSA\t44.52019417\t-109.0237961\nITO\t-1.9650646203554119\tITO\tHilo International\tHilo\tHI\tUSA\t19.72026306\t-155.0484703\nHVN\t-3.6666666666666665\tHVN\tTweed-New Haven\tNew Haven\tCT\tUSA\t41.26389889\t-72.8871\nPIH\t-4.306110793832096\tPIH\tPocatello Regional\tPocatello\tID\tUSA\t42.91130556\t-112.5958611\nWYS\t-5.137229987293519\tWYS\tYellowstone\tWest Yellowstone\tMT\tUSA\t44.68839917\t-111.1176375\nGLH\t-5.5\tGLH\tMid Delta Regional\tGreenville\tMS\tUSA\t33.48288111\t-90.98561389\n"
           },
           {
             "type": "TEXT",
@@ -1133,8 +1308,8 @@
           "tooltip": "View in Spark web UI",
           "group": "spark",
           "values": [
-            "http://zenbook.home:4040/jobs/job?id\u003d49",
-            "http://zenbook.home:4040/jobs/job?id\u003d50"
+            "http://zenbook.home:4040/jobs/job?id\u003d87",
+            "http://zenbook.home:4040/jobs/job?id\u003d88"
           ],
           "interpreterSettingId": "spark"
         }
@@ -1143,15 +1318,15 @@
       "jobName": "paragraph_1551993828475_-49199637",
       "id": "20190307-222348_1564280672",
       "dateCreated": "2019-03-07 22:23:48.475",
-      "dateStarted": "2019-03-10 15:29:50.241",
-      "dateFinished": "2019-03-10 15:30:38.823",
+      "dateStarted": "2019-03-11 23:51:38.059",
+      "dateFinished": "2019-03-11 23:51:59.754",
       "status": "FINISHED",
       "progressUpdateIntervalMs": 500
     },
     {
-      "text": "%sql select * from df4g order by TotalDelay desc limit 3",
+      "text": "%sql select * from df4o order by DepDelay desc limit 3",
       "user": "anonymous",
-      "dateUpdated": "2019-03-10 16:03:41.503",
+      "dateUpdated": "2019-03-11 23:53:16.155",
       "config": {
         "colWidth": 12.0,
         "fontSize": 9.0,
@@ -1206,7 +1381,7 @@
               "groups": [],
               "values": [
                 {
-                  "name": "TotalDelay",
+                  "name": "DepDelay",
                   "index": 1.0,
                   "aggr": "sum"
                 }
@@ -1233,7 +1408,7 @@
         "msg": [
           {
             "type": "TABLE",
-            "data": "Origin\tTotalDelay\tiata\tairport\tcity\tstate\tcountry\tlat\tlong\nACK\t63.36926340940924\tACK\tNantucket Memorial\tNantucket\tMA\tUSA\t41.25305194\t-70.06018139\nSOP\t50.839747846894994\tSOP\tMoore County\tPinehurst/Southern Pines\tNC\tUSA\t35.23735278\t-79.39116944\nOTH\t48.38306451612903\tOTH\tNorth Bend Muni\tNorth Bend\tOR\tUSA\t43.41713889\t-124.2460278\n"
+            "data": "Origin\tDepDelay\tiata\tairport\tcity\tstate\tcountry\tlat\tlong\nACK\t37.283018867924525\tACK\tNantucket Memorial\tNantucket\tMA\tUSA\t41.25305194\t-70.06018139\nPIR\t32.888888888888886\tPIR\tPierre Regional\tPierre\tSD\tUSA\t44.38267694\t-100.285965\nPUB\t27.0\tPUB\tPueblo Memorial\tPueblo\tCO\tUSA\t38.28908722\t-104.4965722\n"
           },
           {
             "type": "TEXT",
@@ -1248,8 +1423,8 @@
           "tooltip": "View in Spark web UI",
           "group": "spark",
           "values": [
-            "http://zenbook.home:4040/jobs/job?id\u003d51",
-            "http://zenbook.home:4040/jobs/job?id\u003d52"
+            "http://zenbook.home:4040/jobs/job?id\u003d89",
+            "http://zenbook.home:4040/jobs/job?id\u003d90"
           ],
           "interpreterSettingId": "spark"
         }
@@ -1258,8 +1433,8 @@
       "jobName": "paragraph_1551994759907_1548479665",
       "id": "20190307-223919_1968098608",
       "dateCreated": "2019-03-07 22:39:19.907",
-      "dateStarted": "2019-03-10 15:29:52.946",
-      "dateFinished": "2019-03-10 15:31:26.686",
+      "dateStarted": "2019-03-11 23:51:43.255",
+      "dateFinished": "2019-03-11 23:52:22.338",
       "status": "FINISHED",
       "progressUpdateIntervalMs": 500
     }
