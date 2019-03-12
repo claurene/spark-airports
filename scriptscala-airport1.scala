@@ -82,7 +82,7 @@ val df2 = col2.map { name:String => (name, df.filter(name+">0").count)}.toSeq.to
 df2.sort(desc("CountDelay")).show
 
 println("Seconde interprétation :")
-val df2_1 = col2.map {name:String => (name,df.select(sum(df(name))).first.getLong(0)) }.toSeq.toDF("Name","CountDelay")
+val df2_1 = col2.map {name:String => (name,df.select(sum(df(name))).first.getDouble(0)) }.toSeq.toDF("Name","CountDelay")
 df2_1.sort(desc("CountDelay")).show
 
 // --------------------------------------------------------
